@@ -1,0 +1,654 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Graceful Shutdown 与清理 - Graceful Shutdown 与清理 - Rust 程序设计语言 简体中文版</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Rust 程序设计语言 简体中文版">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        <style>
+            .page-wrapper.has-warning > .nav-chapters {
+              /* add height for warning content & margin */
+              top: 120px;
+            }
+
+            p.warning {
+                background-color: rgb(242, 222, 222);
+                border-bottom-color: rgb(238, 211, 215);
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+                border-bottom-style: solid;
+                border-bottom-width: 0.666667px;
+                border-image-outset: 0 0 0 0;
+                border-image-repeat: stretch stretch;
+                border-image-slice: 100% 100% 100% 100%;
+                border-image-source: none;
+                border-image-width: 1 1 1 1;
+                border-left-color: rgb(238, 211, 215);
+                border-left-style: solid;
+                border-left-width: 0.666667px;
+                border-right-color: rgb(238, 211, 215);
+                border-right-style: solid;
+                border-right-width: 0.666667px;
+                border-top-color: rgb(238, 211, 215);
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border-top-style: solid;
+                border-top-width: 0.666667px;
+                color: rgb(185, 74, 72);
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 30px;
+                padding-bottom: 8px;
+                padding-left: 14px;
+                padding-right: 35px;
+                padding-top: 8px;
+            }
+            p.warning strong {
+                color: rgb(185, 74, 72)
+            }
+            p.warning a {
+                color: rgb(0, 136, 204)
+            }
+
+            a .hljs {
+                color: #4183c4;
+            }
+
+            .rust .content a .hljs,
+            .coal .content a .hljs,
+            .navy .content a .hljs {
+                color: #2b79a2;
+            }
+
+            a:hover .hljs {
+                text-decoration: underline;
+            }
+
+            /* Styles keystrokes such as ctrl-C */
+            .keystroke {
+                font-variant: small-caps;
+            }
+        </style>
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="ch01-00-introduction.html"><strong>1.</strong> 介绍</a></li><li><ul class="section"><li><a href="ch01-01-installation.html"><strong>1.1.</strong> 安装</a></li><li><a href="ch01-02-hello-world.html"><strong>1.2.</strong> Hello, World!</a></li></ul></li><li><a href="ch02-00-guessing-game-tutorial.html"><strong>2.</strong> 猜猜看教程</a></li><li><a href="ch03-00-common-programming-concepts.html"><strong>3.</strong> 通用编程概念</a></li><li><ul class="section"><li><a href="ch03-01-variables-and-mutability.html"><strong>3.1.</strong> 变量与可变性</a></li><li><a href="ch03-02-data-types.html"><strong>3.2.</strong> 数据类型</a></li><li><a href="ch03-03-how-functions-work.html"><strong>3.3.</strong> 函数如何工作</a></li><li><a href="ch03-04-comments.html"><strong>3.4.</strong> 注释</a></li><li><a href="ch03-05-control-flow.html"><strong>3.5.</strong> 控制流</a></li></ul></li><li><a href="ch04-00-understanding-ownership.html"><strong>4.</strong> 认识所有权</a></li><li><ul class="section"><li><a href="ch04-01-what-is-ownership.html"><strong>4.1.</strong> 什么是所有权</a></li><li><a href="ch04-02-references-and-borrowing.html"><strong>4.2.</strong> 引用与借用</a></li><li><a href="ch04-03-slices.html"><strong>4.3.</strong> Slices</a></li></ul></li><li><a href="ch05-00-structs.html"><strong>5.</strong> 使用结构体来组织相关联的数据</a></li><li><ul class="section"><li><a href="ch05-01-defining-structs.html"><strong>5.1.</strong> 定义并实例化结构体</a></li><li><a href="ch05-02-example-structs.html"><strong>5.2.</strong> 一个使用结构体的示例程序</a></li><li><a href="ch05-03-method-syntax.html"><strong>5.3.</strong> 方法语法</a></li></ul></li><li><a href="ch06-00-enums.html"><strong>6.</strong> 枚举与模式匹配</a></li><li><ul class="section"><li><a href="ch06-01-defining-an-enum.html"><strong>6.1.</strong> 定义枚举</a></li><li><a href="ch06-02-match.html"><strong>6.2.</strong> <code>match</code> 控制流运算符</a></li><li><a href="ch06-03-if-let.html"><strong>6.3.</strong> <code>if let</code> 简洁控制流</a></li></ul></li><li><a href="ch07-00-modules.html"><strong>7.</strong> 模块</a></li><li><ul class="section"><li><a href="ch07-01-mod-and-the-filesystem.html"><strong>7.1.</strong> <code>mod</code> 与文件系统</a></li><li><a href="ch07-02-controlling-visibility-with-pub.html"><strong>7.2.</strong> 使用 <code>pub</code> 控制可见性</a></li><li><a href="ch07-03-importing-names-with-use.html"><strong>7.3.</strong> 在不同的模块中引用命名</a></li></ul></li><li><a href="ch08-00-common-collections.html"><strong>8.</strong> 通用集合类型</a></li><li><ul class="section"><li><a href="ch08-01-vectors.html"><strong>8.1.</strong> vector</a></li><li><a href="ch08-02-strings.html"><strong>8.2.</strong> 字符串</a></li><li><a href="ch08-03-hash-maps.html"><strong>8.3.</strong> 哈希 map</a></li></ul></li><li><a href="ch09-00-error-handling.html"><strong>9.</strong> 错误处理</a></li><li><ul class="section"><li><a href="ch09-01-unrecoverable-errors-with-panic.html"><strong>9.1.</strong> <code>panic!</code> 与不可恢复的错误</a></li><li><a href="ch09-02-recoverable-errors-with-result.html"><strong>9.2.</strong> <code>Result</code> 与可恢复的错误</a></li><li><a href="ch09-03-to-panic-or-not-to-panic.html"><strong>9.3.</strong> <code>panic!</code> 还是不 <code>panic!</code></a></li></ul></li><li><a href="ch10-00-generics.html"><strong>10.</strong> 泛型、trait 与生命周期</a></li><li><ul class="section"><li><a href="ch10-01-syntax.html"><strong>10.1.</strong> 泛型数据类型</a></li><li><a href="ch10-02-traits.html"><strong>10.2.</strong> trait：定义共享的行为</a></li><li><a href="ch10-03-lifetime-syntax.html"><strong>10.3.</strong> 生命周期与引用有效性</a></li></ul></li><li><a href="ch11-00-testing.html"><strong>11.</strong> 测试</a></li><li><ul class="section"><li><a href="ch11-01-writing-tests.html"><strong>11.1.</strong> 编写测试</a></li><li><a href="ch11-02-running-tests.html"><strong>11.2.</strong> 运行测试</a></li><li><a href="ch11-03-test-organization.html"><strong>11.3.</strong> 测试的组织结构</a></li></ul></li><li><a href="ch12-00-an-io-project.html"><strong>12.</strong> 一个 I/O 项目：构建命令行程序</a></li><li><ul class="section"><li><a href="ch12-01-accepting-command-line-arguments.html"><strong>12.1.</strong> 接受命令行参数</a></li><li><a href="ch12-02-reading-a-file.html"><strong>12.2.</strong> 读取文件</a></li><li><a href="ch12-03-improving-error-handling-and-modularity.html"><strong>12.3.</strong> 重构以改进模块化与错误处理</a></li><li><a href="ch12-04-testing-the-librarys-functionality.html"><strong>12.4.</strong> 采用测试驱动开发完善库的功能</a></li><li><a href="ch12-05-working-with-environment-variables.html"><strong>12.5.</strong> 处理环境变量</a></li><li><a href="ch12-06-writing-to-stderr-instead-of-stdout.html"><strong>12.6.</strong> 将错误信息输出到标准错误而不是标准输出</a></li></ul></li><li><a href="ch13-00-functional-features.html"><strong>13.</strong> Rust 中的函数式语言功能：迭代器与闭包</a></li><li><ul class="section"><li><a href="ch13-01-closures.html"><strong>13.1.</strong> 闭包：可以捕获其环境的匿名函数</a></li><li><a href="ch13-02-iterators.html"><strong>13.2.</strong> 使用迭代器处理元素序列</a></li><li><a href="ch13-03-improving-our-io-project.html"><strong>13.3.</strong> 改进之前的 I/O 项目</a></li><li><a href="ch13-04-performance.html"><strong>13.4.</strong> 性能比较：循环对迭代器</a></li></ul></li><li><a href="ch14-00-more-about-cargo.html"><strong>14.</strong> 更多关于 Cargo 和 Crates.io 的内容</a></li><li><ul class="section"><li><a href="ch14-01-release-profiles.html"><strong>14.1.</strong> 采用发布配置自定义构建</a></li><li><a href="ch14-02-publishing-to-crates-io.html"><strong>14.2.</strong> 将 crate 发布到 Crates.io</a></li><li><a href="ch14-03-cargo-workspaces.html"><strong>14.3.</strong> Cargo 工作空间</a></li><li><a href="ch14-04-installing-binaries.html"><strong>14.4.</strong> 使用 <code>cargo install</code> 从 Crates.io 安装二进制文件</a></li><li><a href="ch14-05-extending-cargo.html"><strong>14.5.</strong> Cargo 自定义扩展命令</a></li></ul></li><li><a href="ch15-00-smart-pointers.html"><strong>15.</strong> 智能指针</a></li><li><ul class="section"><li><a href="ch15-01-box.html"><strong>15.1.</strong> <code>Box&lt;T&gt;</code> 在堆上存储数据，并且可确定大小</a></li><li><a href="ch15-02-deref.html"><strong>15.2.</strong> <code>Deref</code> Trait 允许通过引用访问数据</a></li><li><a href="ch15-03-drop.html"><strong>15.3.</strong> <code>Drop</code> Trait 运行清理代码</a></li><li><a href="ch15-04-rc.html"><strong>15.4.</strong> <code>Rc&lt;T&gt;</code> 引用计数智能指针</a></li><li><a href="ch15-05-interior-mutability.html"><strong>15.5.</strong> <code>RefCell&lt;T&gt;</code> 和内部可变性模式</a></li><li><a href="ch15-06-reference-cycles.html"><strong>15.6.</strong> 引用循环和内存泄漏是安全的</a></li></ul></li><li><a href="ch16-00-concurrency.html"><strong>16.</strong> 无畏并发</a></li><li><ul class="section"><li><a href="ch16-01-threads.html"><strong>16.1.</strong> 线程</a></li><li><a href="ch16-02-message-passing.html"><strong>16.2.</strong> 消息传递</a></li><li><a href="ch16-03-shared-state.html"><strong>16.3.</strong> 共享状态</a></li><li><a href="ch16-04-extensible-concurrency-sync-and-send.html"><strong>16.4.</strong> 可扩展的并发：<code>Sync</code>和<code>Send</code></a></li></ul></li><li><a href="ch17-00-oop.html"><strong>17.</strong> Rust 是面向对象语言吗？</a></li><li><ul class="section"><li><a href="ch17-01-what-is-oo.html"><strong>17.1.</strong> 什么是面向对象？</a></li><li><a href="ch17-02-trait-objects.html"><strong>17.2.</strong> 为使用不同类型的值而设计的 trait 对象</a></li><li><a href="ch17-03-oo-design-patterns.html"><strong>17.3.</strong> 面向对象设计模式的实现</a></li></ul></li><li><a href="ch18-00-patterns.html"><strong>18.</strong> 模式用来匹配值的结构</a></li><li><ul class="section"><li><a href="ch18-01-all-the-places-for-patterns.html"><strong>18.1.</strong> 所有可能会用到模式的位置</a></li><li><a href="ch18-02-refutability.html"><strong>18.2.</strong> Refutability：何时模式可能会匹配失败</a></li><li><a href="ch18-03-pattern-syntax.html"><strong>18.3.</strong> 模式的全部语法</a></li></ul></li><li><a href="ch19-00-advanced-features.html"><strong>19.</strong> 高级特征</a></li><li><ul class="section"><li><a href="ch19-01-unsafe-rust.html"><strong>19.1.</strong> 不安全的 Rust</a></li><li><a href="ch19-02-advanced-lifetimes.html"><strong>19.2.</strong> 高级生命周期</a></li><li><a href="ch19-03-advanced-traits.html"><strong>19.3.</strong> 高级 trait</a></li><li><a href="ch19-04-advanced-types.html"><strong>19.4.</strong> 高级类型</a></li><li><a href="ch19-05-advanced-functions-and-closures.html"><strong>19.5.</strong> 高级函数与闭包</a></li></ul></li><li><a href="ch20-00-final-project-a-web-server.html"><strong>20.</strong> 最后的项目: 构建多线程 web server</a></li><li><ul class="section"><li><a href="ch20-01-single-threaded.html"><strong>20.1.</strong> 单线程 web server</a></li><li><a href="ch20-02-slow-requests.html"><strong>20.2.</strong> 慢请求如何影响吞吐率</a></li><li><a href="ch20-03-designing-the-interface.html"><strong>20.3.</strong> 设计线程池接口</a></li><li><a href="ch20-04-storing-threads.html"><strong>20.4.</strong> 创建线程池并储存线程</a></li><li><a href="ch20-05-sending-requests-via-channels.html"><strong>20.5.</strong> 使用通道向线程发送请求</a></li><li><a href="ch20-06-graceful-shutdown-and-cleanup.html" class="active"><strong>20.6.</strong> Graceful Shutdown 与清理</a></li></ul></li><li><a href="appendix-00.html"><strong>21.</strong> 附录</a></li><li><ul class="section"><li><a href="appendix-01-keywords.html"><strong>21.1.</strong> A - 关键字</a></li><li><a href="appendix-02-operators.html"><strong>21.2.</strong> B - 运算符与符号</a></li><li><a href="appendix-03-derivable-traits.html"><strong>21.3.</strong> C - 可导出的 trait</a></li><li><a href="appendix-04-macros.html"><strong>21.4.</strong> D - 宏</a></li><li><a href="appendix-05-translation.html"><strong>21.5.</strong> E - 本书翻译</a></li><li><a href="appendix-06-newest-features.html"><strong>21.6.</strong> F - 最新功能</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper has-warning">
+
+            <div class="page" tabindex="-1">
+                
+                <header></header>
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">Rust 程序设计语言 简体中文版</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="ch20-06-graceful-shutdown-and-cleanup.html#graceful-shutdown-与清理" id="graceful-shutdown-与清理"><h2>Graceful Shutdown 与清理</h2></a>
+<blockquote>
+<p><a href="https://github.com/rust-lang/book/blob/master/second-edition/src/ch20-06-graceful-shutdown-and-cleanup.md">ch20-06-graceful-shutdown-and-cleanup.md</a>
+<br>
+commit 2e269ff82193fd65df8a87c06561d74b51ac02f7</p>
+</blockquote>
+<p>列表 20-21 中的代码如期通过使用线程池异步的响应请求。这里有一些警告说存在一些字段并没有直接被使用，这提醒了我们并没有清理任何内容。当使用 <span class="keystroke">ctrl-C</span> 终止主线程，所有其他线程也会立刻停止，即便他们正在处理一个请求。</p>
+<p>现在我们要为 <code>ThreadPool</code> 实现 <code>Drop</code> trait 对线程池中的每一个线程调用 <code>join</code>，这样这些线程将会执行完他们的请求。接着会为 <code>ThreadPool</code> 实现一个方法来告诉线程他们应该停止接收新请求并结束。为了实践这些代码，修改 server 在 graceful Shutdown 之前只接受两个请求。</p>
+<p>现在开始为线程池实现 <code>Drop</code>。当线程池被丢弃时，应该 join 所有线程以确保他们完成其操作。列表 20-22 展示了 <code>Drop</code> 实现的第一次尝试；这些代码还不能够编译：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+impl Drop for ThreadPool {
+    fn drop(&amp;mut self) {
+        for worker in &amp;mut self.workers {
+            println!(&quot;Shutting down worker {}&quot;, worker.id);
+
+            worker.thread.join().unwrap();
+        }
+    }
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 20-22：当线程池离开作用域时 join 每个线程</span></p>
+<p>这里遍历线程池中的每个 <code>workers</code>，这里使用了 <code>&amp;mut</code> 因为 <code>self</code> 本身是一个可变引用而且也需要能够修改 <code>worker</code>。当特定 worker 关闭时会打印出说明信息，接着在对应 worker 上调用 <code>join</code>。如果 <code>join</code> 失败了，通过 <code>unwrap</code> 将错误变为 panic 从而无法进行 graceful Shutdown。</p>
+<p>如下是尝试编译代码时得到的错误：</p>
+<pre><code>error[E0507]: cannot move out of borrowed content
+  --&gt; src/lib.rs:65:13
+   |
+65 |             worker.thread.join().unwrap();
+   |             ^^^^^^ cannot move out of borrowed content
+</code></pre>
+<p>因为我们只有每个 <code>worker</code> 的可变借用，并不能调用 <code>join</code>：<code>join</code> 获取其参数的所有权。为了解决这个问题，需要一个方法将 <code>thread</code> 移动出拥有其所有权的 <code>Worker</code> 实例以便 <code>join</code> 可以消费这个线程。列表 17-15 中我们曾见过这么做的方法：如果 <code>Worker</code> 存放的是 <code>Option&lt;thread::JoinHandle&lt;()&gt;</code>，就可以在 <code>Option</code> 上调用 <code>take</code> 方法将值从 <code>Some</code> 成员中移动出来而对 <code>None</code> 成员不做处理。换句话说，正在运行的 <code>Worker</code> 的 <code>thread</code> 将是 <code>Some</code> 成员值，而当需要清理 worker 时，将 <code>Some</code> 替换为 <code>None</code>，这样 worker 就没有可以运行的线程了。</p>
+<p>所以我们知道了需要更新 <code>Worker</code> 的定义为如下：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+# use std::thread;
+struct Worker {
+    id: usize,
+    thread: Option&lt;thread::JoinHandle&lt;()&gt;&gt;,
+}
+#}</code></pre></pre>
+<p>现在依靠编译器来找出其他需要修改的地方。我们会得到两个错误：</p>
+<pre><code>error: no method named `join` found for type
+`std::option::Option&lt;std::thread::JoinHandle&lt;()&gt;&gt;` in the current scope
+  --&gt; src/lib.rs:65:27
+   |
+65 |             worker.thread.join().unwrap();
+   |                           ^^^^
+
+error[E0308]: mismatched types
+  --&gt; src/lib.rs:89:21
+   |
+89 |             thread,
+   |             ^^^^^^ expected enum `std::option::Option`, found
+   struct `std::thread::JoinHandle`
+   |
+   = note: expected type `std::option::Option&lt;std::thread::JoinHandle&lt;()&gt;&gt;`
+              found type `std::thread::JoinHandle&lt;_&gt;`
+</code></pre>
+<p>第二个错误指向 <code>Worker::new</code> 结尾的代码；当新建 <code>Worker</code> 时需要将 <code>thread</code> 值封装进 <code>Some</code>：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+impl Worker {
+    fn new(id: usize, receiver: Arc&lt;Mutex&lt;mpsc::Receiver&lt;Job&gt;&gt;&gt;) -&gt; Worker {
+        // ...snip...
+
+        Worker {
+            id,
+            thread: Some(thread),
+        }
+    }
+}
+#}</code></pre></pre>
+<p>第一个错误有关 <code>Drop</code> 实现，而且我们提到过要调用 <code>Option</code> 上的 <code>take</code> 将 <code>thread</code> 移动出 <code>worker</code>。如下是代码：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+impl Drop for ThreadPool {
+    fn drop(&amp;mut self) {
+        for worker in &amp;mut self.workers {
+            println!(&quot;Shutting down worker {}&quot;, worker.id);
+
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
+    }
+}
+#}</code></pre></pre>
+<p>如第十七章我们见过的，<code>Option</code> 上的 <code>take</code> 方法会取出 <code>Some</code> 而留下 <code>None</code>。使用 <code>if let</code> 解构 <code>Some</code> 并得到线程，接着在线程上调用 <code>join</code>。如果 worker 的线程已然是 <code>None</code>，就知道此时这个 worker 已经清理了其线程且无需做任何操作。</p>
+<p>有了这些修改，代码就能编译且没有任何警告。不过也有坏消息，这些代码还不能以我们期望的方式运行。问题的关键在于 <code>Worker</code> 中分配的线程所运行的闭包中的逻辑：调用 <code>join</code> 并不会关闭线程，因为他们一直 <code>loop</code> 来寻找任务。如果采用这个实现来尝试丢弃 <code>ThreadPool</code> ，则主线程会永远阻塞在等待第一个线程结束上。</p>
+<p>为了修复这个问题，修改线程既监听是否有 <code>Job</code> 运行也要监听应该停止监听并退出无限循环的信号。所以通道将发送这个枚举的两个成员之一而不再直接使用 <code>Job</code> 实例：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+# struct Job;
+enum Message {
+    NewJob(Job),
+    Terminate,
+}
+#}</code></pre></pre>
+<p><code>Message</code> 枚举要么是存放了线程需要运行的 <code>Job</code> 的 <code>NewJob</code> 成员，要么是会导致线程退出循环并终止的 <code>Terminate</code> 成员。</p>
+<p>同时需要修改通道来使用 <code>Message</code> 类型值而不是 <code>Job</code>，如列表 20-23 所示：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub struct ThreadPool {
+    workers: Vec&lt;Worker&gt;,
+    sender: mpsc::Sender&lt;Message&gt;,
+}
+
+// ...snip...
+
+impl ThreadPool {
+    // ...snip...
+    pub fn new(size: usize) -&gt; ThreadPool {
+        assert!(size &gt; 0);
+
+        let (sender, receiver) = mpsc::channel();
+
+        // ...snip...
+    }
+
+    pub fn execute&lt;F&gt;(&amp;self, f: F)
+        where
+            F: FnOnce() + Send + 'static
+    {
+        let job = Box::new(f);
+
+        self.sender.send(Message::NewJob(job)).unwrap();
+    }
+}
+
+// ...snip...
+
+impl Worker {
+    fn new(id: usize, receiver: Arc&lt;Mutex&lt;mpsc::Receiver&lt;Message&gt;&gt;&gt;) -&gt;
+        Worker {
+
+        let thread = thread::spawn(move ||{
+            loop {
+                let message = receiver.lock().unwrap().recv().unwrap();
+
+                match message {
+                    Message::NewJob(job) =&gt; {
+                        println!(&quot;Worker {} got a job; executing.&quot;, id);
+
+                        job.call_box();
+                    },
+                    Message::Terminate =&gt; {
+                        println!(&quot;Worker {} was told to terminate.&quot;, id);
+
+                        break;
+                    },
+                }
+            }
+        });
+
+        Worker {
+            id,
+            thread: Some(thread),
+        }
+    }
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 20-23：收发 <code>Message</code> 值并在 <code>Worker</code> 收到 <code>Message::Terminate</code> 时退出循环</span></p>
+<p>需要将 <code>ThreadPool</code> 定义、创建通道的 <code>ThreadPool::new</code> 和 <code>Worker::new</code> 签名中的 <code>Job</code> 改为 <code>Message</code>。<code>ThreadPool</code> 的 <code>execute</code> 方法需要发送封装进 <code>Message::NewJob</code> 成员的任务，当获取到 <code>NewJob</code> 时会处理任务而收到 <code>Terminate</code> 成员时则会退出循环。</p>
+<p>通过这些修改，代码再次能够编译并按照期望的行为运行。不过还是会得到一个警告，因为并没有在任何消息中使用 <code>Terminate</code> 成员。如列表 20-14 所示那样修改 <code>Drop</code> 实现：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><code class="language-rust ignore">impl Drop for ThreadPool {
+    fn drop(&amp;mut self) {
+        println!(&quot;Sending terminate message to all workers.&quot;);
+
+        for _ in &amp;mut self.workers {
+            self.sender.send(Message::Terminate).unwrap();
+        }
+
+        println!(&quot;Shutting down all workers.&quot;);
+
+        for worker in &amp;mut self.workers {
+            println!(&quot;Shutting down worker {}&quot;, worker.id);
+
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
+    }
+}
+</code></pre>
+<p><span class="caption">列表 20-24：在对每个 worker 线程调用 <code>join</code> 之前向 worker 发送 <code>Message::Terminate</code></span></p>
+<p>现在遍历了 worker 两次，一次向每个 worker 发送一个 <code>Terminate</code> 消息，一个调用每个 worker 线程上的  <code>join</code>。如果尝试在同一循环中发送消息并立即 join 线程，则无法保证当前迭代的 worker 是从通道收到终止消息的 worker。</p>
+<p>为了更好的理解为什么需要两个分开的循环，想象一下只有两个 worker 的场景。如果在一个循环中遍历每个 worker，在第一次迭代中 <code>worker</code> 是第一个 worker，我们向通道发出终止消息并对第一个 worker 线程调用 <code>join</code>。如果第一个 worker 当时正忙于处理请求，则第二个 worker 会从通道接收这个终止消息并结束。而我们在等待第一个 worker 结束，不过它永远也不会结束因为第二个线程取走了终止消息。现在我们就阻塞在了等待第一个 worker 结束，而无法发出第二条终止消息。死锁！</p>
+<p>为了避免此情况，首先从通道中取出所有的 <code>Terminate</code> 消息，接着 join 所有的线程。因为每个 worker 一旦收到终止消息即会停止从通道接收消息，我们就可以确保如果发送同 worker 数相同的终止消息，在 join 之前每个线程都会收到一个终止消息。</p>
+<p>为了实践这些代码，如列表 20-25 所示修改 <code>main</code> 在 graceful Shutdown server 之前只接受两个请求：</p>
+<p><span class="filename">文件名: src/bin/main.rs</span></p>
+<pre><code class="language-rust ignore">fn main() {
+    let listener = TcpListener::bind(&quot;127.0.0.1:8080&quot;).unwrap();
+    let pool = ThreadPool::new(4);
+
+    let mut counter = 0;
+
+    for stream in listener.incoming() {
+        if counter == 2 {
+            println!(&quot;Shutting down.&quot;);
+            break;
+        }
+
+        counter += 1;
+
+        let stream = stream.unwrap();
+
+        pool.execute(|| {
+            handle_connection(stream);
+        });
+    }
+}
+</code></pre>
+<p><span class="caption">列表 20-25：在处理两个请求之后通过退出循环来停止 server</span></p>
+<p>只处理两次请求并不是生产环境的 web server 所期望的行为，不过这可以让我们看清 graceful shutdown 和清理起作用了，因为不用再通过 <span class="keystroke">ctrl-C</span> 停止 server 了。</p>
+<p>这里还增加了一个 <code>counter</code> 变量在每次收到 TCP 流时递增。如果计数到达 2，会停止处理请求并退出 <code>for</code> 循环。<code>ThreadPool</code> 会在 <code>main</code> 的结尾离开作用域，而且还会看到 <code>drop</code> 实现的运行。</p>
+<p>使用 <code>cargo run</code> 启动 server，并发起三个请求。第三个请求应该会失败，而终端的输出应该看起来像这样：</p>
+<pre><code>$ cargo run
+   Compiling hello v0.1.0 (file:///projects/hello)
+    Finished dev [unoptimized + debuginfo] target(s) in 1.0 secs
+     Running `target/debug/hello`
+Worker 0 got a job; executing.
+Worker 3 got a job; executing.
+Shutting down.
+Sending terminate message to all workers.
+Shutting down all workers.
+Shutting down worker 0
+Worker 1 was told to terminate.
+Worker 2 was told to terminate.
+Worker 0 was told to terminate.
+Worker 3 was told to terminate.
+Shutting down worker 1
+Shutting down worker 2
+Shutting down worker 3
+</code></pre>
+<p>当然，你可能会看到不同顺序的输出。可以从信息中看到服务是如何运行的： worker 0 和 worker 3 获取了头两个请求，接着在第三个请求时，我们停止接收连接。当 <code>ThreadPool</code> 在 <code>main</code> 的结尾离开作用域时，其 <code>Drop</code> 实现开始工作，线程池通知所有线程终止。每个 worker 在收到终止消息时会打印出一个信息，接着线程池调用 <code>join</code> 来终止每一个 worker 线程。</p>
+<p>这个特定的运行过程中一个有趣的地方在于：注意我们向通道中发出终止消息，而在任何线程收到消息之前，就尝试 join worker 0 了。worker 0 还没有收到终止消息，所以主线程阻塞直到 worker 0 结束。与此同时，每一个线程都收到了终止消息。一旦 worker 0 结束，主线程就等待其他 worker 结束，此时他们都已经收到终止消息并能够停止了。</p>
+<p>恭喜！现在我们完成了这个项目，也有了一个使用线程池异步响应请求的基础 web server。我们能对 server 执行 graceful shutdown，它会清理线程池中的所有线程。如下是完整的代码参考：</p>
+<p><span class="filename">Filename: src/bin/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">extern crate hello;
+use hello::ThreadPool;
+
+use std::io::prelude::*;
+use std::net::TcpListener;
+use std::net::TcpStream;
+use std::fs::File;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let listener = TcpListener::bind(&quot;127.0.0.1:8080&quot;).unwrap();
+    let pool = ThreadPool::new(4);
+
+    let mut counter = 0;
+
+    for stream in listener.incoming() {
+        if counter == 2 {
+            println!(&quot;Shutting down.&quot;);
+            break;
+        }
+
+        counter += 1;
+
+        let stream = stream.unwrap();
+
+        pool.execute(|| {
+            handle_connection(stream);
+        });
+    }
+}
+
+fn handle_connection(mut stream: TcpStream) {
+    let mut buffer = [0; 512];
+    stream.read(&amp;mut buffer).unwrap();
+
+    let get = b&quot;GET / HTTP/1.1\r\n&quot;;
+    let sleep = b&quot;GET /sleep HTTP/1.1\r\n&quot;;
+
+    let (status_line, filename) = if buffer.starts_with(get) {
+        (&quot;HTTP/1.1 200 OK\r\n\r\n&quot;, &quot;hello.html&quot;)
+    } else if buffer.starts_with(sleep) {
+        thread::sleep(Duration::from_secs(5));
+        (&quot;HTTP/1.1 200 OK\r\n\r\n&quot;, &quot;hello.html&quot;)
+    } else {
+        (&quot;HTTP/1.1 404 NOT FOUND\r\n\r\n&quot;, &quot;404.html&quot;)
+    };
+
+     let mut file = File::open(filename).unwrap();
+     let mut contents = String::new();
+
+     file.read_to_string(&amp;mut contents).unwrap();
+
+     let response = format!(&quot;{}{}&quot;, status_line, contents);
+
+     stream.write(response.as_bytes()).unwrap();
+     stream.flush().unwrap();
+}
+</code></pre></pre>
+<p><span class="filename">Filename: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+use std::thread;
+use std::sync::mpsc;
+use std::sync::Arc;
+use std::sync::Mutex;
+
+enum Message {
+    NewJob(Job),
+    Terminate,
+}
+
+pub struct ThreadPool {
+    workers: Vec&lt;Worker&gt;,
+    sender: mpsc::Sender&lt;Message&gt;,
+}
+
+trait FnBox {
+    fn call_box(self: Box&lt;Self&gt;);
+}
+
+impl&lt;F: FnOnce()&gt; FnBox for F {
+    fn call_box(self: Box&lt;F&gt;) {
+        (*self)()
+    }
+}
+
+type Job = Box&lt;FnBox + Send + 'static&gt;;
+
+impl ThreadPool {
+    /// Create a new ThreadPool.
+    ///
+    /// The size is the number of threads in the pool.
+    ///
+    /// # Panics
+    ///
+    /// The `new` function will panic if the size is zero.
+    pub fn new(size: usize) -&gt; ThreadPool {
+        assert!(size &gt; 0);
+
+        let (sender, receiver) = mpsc::channel();
+
+        let receiver = Arc::new(Mutex::new(receiver));
+
+        let mut workers = Vec::with_capacity(size);
+
+        for id in 0..size {
+            workers.push(Worker::new(id, receiver.clone()));
+        }
+
+        ThreadPool {
+            workers,
+            sender,
+        }
+    }
+
+    pub fn execute&lt;F&gt;(&amp;self, f: F)
+        where
+            F: FnOnce() + Send + 'static
+    {
+        let job = Box::new(f);
+
+        self.sender.send(Message::NewJob(job)).unwrap();
+    }
+}
+
+impl Drop for ThreadPool {
+    fn drop(&amp;mut self) {
+        println!(&quot;Sending terminate message to all workers.&quot;);
+
+        for _ in &amp;mut self.workers {
+            self.sender.send(Message::Terminate).unwrap();
+        }
+
+        println!(&quot;Shutting down all workers.&quot;);
+
+        for worker in &amp;mut self.workers {
+            println!(&quot;Shutting down worker {}&quot;, worker.id);
+
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
+    }
+}
+
+struct Worker {
+    id: usize,
+    thread: Option&lt;thread::JoinHandle&lt;()&gt;&gt;,
+}
+
+impl Worker {
+    fn new(id: usize, receiver: Arc&lt;Mutex&lt;mpsc::Receiver&lt;Message&gt;&gt;&gt;) -&gt;
+        Worker {
+
+        let thread = thread::spawn(move ||{
+            loop {
+                let message = receiver.lock().unwrap().recv().unwrap();
+
+                match message {
+                    Message::NewJob(job) =&gt; {
+                        println!(&quot;Worker {} got a job; executing.&quot;, id);
+
+                        job.call_box();
+                    },
+                    Message::Terminate =&gt; {
+                        println!(&quot;Worker {} was told to terminate.&quot;, id);
+
+                        break;
+                    },
+                }
+            }
+        });
+
+        Worker {
+            id,
+            thread: Some(thread),
+        }
+    }
+}
+#}</code></pre></pre>
+<p>这里还有很多可以做的事！如果你希望继续增强这个项目，如下是一些点子：</p>
+<ul>
+<li>为 <code>ThreadPool</code> 和其公有方法增加更多文档</li>
+<li>为库的功能增加测试</li>
+<li>将 <code>unwrap</code> 调用改为更健壮的错误处理</li>
+<li>使用 <code>ThreadPool</code> 进行其他不同于处理网络请求的任务</li>
+<li>在 crates.io 寻找一个线程池 crate 并使用它实现一个类似的 web server，将其 API 和鲁棒性与我们的实现做对比</li>
+</ul>
+<a class="header" href="ch20-06-graceful-shutdown-and-cleanup.html#总结" id="总结"><h2>总结</h2></a>
+<p>好极了！你结束了本书的学习！由衷感谢你与我们一道加入这次 Rust 之旅。现在你已经准备好出发并实现自己的 Rust 项目或帮助他人了。请不要忘记我们的社区，这里有其他 Rustaceans 正乐于帮助你迎接 Rust 之路上的任何挑战。</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="ch20-05-sending-requests-via-channels.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="appendix-00.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="ch20-05-sending-requests-via-channels.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="appendix-00.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>采用发布配置自定义构建 - 采用发布配置自定义构建 - Rust 程序设计语言 简体中文版</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Rust 程序设计语言 简体中文版">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        <style>
+            .page-wrapper.has-warning > .nav-chapters {
+              /* add height for warning content & margin */
+              top: 120px;
+            }
+
+            p.warning {
+                background-color: rgb(242, 222, 222);
+                border-bottom-color: rgb(238, 211, 215);
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+                border-bottom-style: solid;
+                border-bottom-width: 0.666667px;
+                border-image-outset: 0 0 0 0;
+                border-image-repeat: stretch stretch;
+                border-image-slice: 100% 100% 100% 100%;
+                border-image-source: none;
+                border-image-width: 1 1 1 1;
+                border-left-color: rgb(238, 211, 215);
+                border-left-style: solid;
+                border-left-width: 0.666667px;
+                border-right-color: rgb(238, 211, 215);
+                border-right-style: solid;
+                border-right-width: 0.666667px;
+                border-top-color: rgb(238, 211, 215);
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border-top-style: solid;
+                border-top-width: 0.666667px;
+                color: rgb(185, 74, 72);
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 30px;
+                padding-bottom: 8px;
+                padding-left: 14px;
+                padding-right: 35px;
+                padding-top: 8px;
+            }
+            p.warning strong {
+                color: rgb(185, 74, 72)
+            }
+            p.warning a {
+                color: rgb(0, 136, 204)
+            }
+
+            a .hljs {
+                color: #4183c4;
+            }
+
+            .rust .content a .hljs,
+            .coal .content a .hljs,
+            .navy .content a .hljs {
+                color: #2b79a2;
+            }
+
+            a:hover .hljs {
+                text-decoration: underline;
+            }
+
+            /* Styles keystrokes such as ctrl-C */
+            .keystroke {
+                font-variant: small-caps;
+            }
+        </style>
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="ch01-00-introduction.html"><strong>1.</strong> 介绍</a></li><li><ul class="section"><li><a href="ch01-01-installation.html"><strong>1.1.</strong> 安装</a></li><li><a href="ch01-02-hello-world.html"><strong>1.2.</strong> Hello, World!</a></li></ul></li><li><a href="ch02-00-guessing-game-tutorial.html"><strong>2.</strong> 猜猜看教程</a></li><li><a href="ch03-00-common-programming-concepts.html"><strong>3.</strong> 通用编程概念</a></li><li><ul class="section"><li><a href="ch03-01-variables-and-mutability.html"><strong>3.1.</strong> 变量与可变性</a></li><li><a href="ch03-02-data-types.html"><strong>3.2.</strong> 数据类型</a></li><li><a href="ch03-03-how-functions-work.html"><strong>3.3.</strong> 函数如何工作</a></li><li><a href="ch03-04-comments.html"><strong>3.4.</strong> 注释</a></li><li><a href="ch03-05-control-flow.html"><strong>3.5.</strong> 控制流</a></li></ul></li><li><a href="ch04-00-understanding-ownership.html"><strong>4.</strong> 认识所有权</a></li><li><ul class="section"><li><a href="ch04-01-what-is-ownership.html"><strong>4.1.</strong> 什么是所有权</a></li><li><a href="ch04-02-references-and-borrowing.html"><strong>4.2.</strong> 引用与借用</a></li><li><a href="ch04-03-slices.html"><strong>4.3.</strong> Slices</a></li></ul></li><li><a href="ch05-00-structs.html"><strong>5.</strong> 使用结构体来组织相关联的数据</a></li><li><ul class="section"><li><a href="ch05-01-defining-structs.html"><strong>5.1.</strong> 定义并实例化结构体</a></li><li><a href="ch05-02-example-structs.html"><strong>5.2.</strong> 一个使用结构体的示例程序</a></li><li><a href="ch05-03-method-syntax.html"><strong>5.3.</strong> 方法语法</a></li></ul></li><li><a href="ch06-00-enums.html"><strong>6.</strong> 枚举与模式匹配</a></li><li><ul class="section"><li><a href="ch06-01-defining-an-enum.html"><strong>6.1.</strong> 定义枚举</a></li><li><a href="ch06-02-match.html"><strong>6.2.</strong> <code>match</code> 控制流运算符</a></li><li><a href="ch06-03-if-let.html"><strong>6.3.</strong> <code>if let</code> 简洁控制流</a></li></ul></li><li><a href="ch07-00-modules.html"><strong>7.</strong> 模块</a></li><li><ul class="section"><li><a href="ch07-01-mod-and-the-filesystem.html"><strong>7.1.</strong> <code>mod</code> 与文件系统</a></li><li><a href="ch07-02-controlling-visibility-with-pub.html"><strong>7.2.</strong> 使用 <code>pub</code> 控制可见性</a></li><li><a href="ch07-03-importing-names-with-use.html"><strong>7.3.</strong> 在不同的模块中引用命名</a></li></ul></li><li><a href="ch08-00-common-collections.html"><strong>8.</strong> 通用集合类型</a></li><li><ul class="section"><li><a href="ch08-01-vectors.html"><strong>8.1.</strong> vector</a></li><li><a href="ch08-02-strings.html"><strong>8.2.</strong> 字符串</a></li><li><a href="ch08-03-hash-maps.html"><strong>8.3.</strong> 哈希 map</a></li></ul></li><li><a href="ch09-00-error-handling.html"><strong>9.</strong> 错误处理</a></li><li><ul class="section"><li><a href="ch09-01-unrecoverable-errors-with-panic.html"><strong>9.1.</strong> <code>panic!</code> 与不可恢复的错误</a></li><li><a href="ch09-02-recoverable-errors-with-result.html"><strong>9.2.</strong> <code>Result</code> 与可恢复的错误</a></li><li><a href="ch09-03-to-panic-or-not-to-panic.html"><strong>9.3.</strong> <code>panic!</code> 还是不 <code>panic!</code></a></li></ul></li><li><a href="ch10-00-generics.html"><strong>10.</strong> 泛型、trait 与生命周期</a></li><li><ul class="section"><li><a href="ch10-01-syntax.html"><strong>10.1.</strong> 泛型数据类型</a></li><li><a href="ch10-02-traits.html"><strong>10.2.</strong> trait：定义共享的行为</a></li><li><a href="ch10-03-lifetime-syntax.html"><strong>10.3.</strong> 生命周期与引用有效性</a></li></ul></li><li><a href="ch11-00-testing.html"><strong>11.</strong> 测试</a></li><li><ul class="section"><li><a href="ch11-01-writing-tests.html"><strong>11.1.</strong> 编写测试</a></li><li><a href="ch11-02-running-tests.html"><strong>11.2.</strong> 运行测试</a></li><li><a href="ch11-03-test-organization.html"><strong>11.3.</strong> 测试的组织结构</a></li></ul></li><li><a href="ch12-00-an-io-project.html"><strong>12.</strong> 一个 I/O 项目：构建命令行程序</a></li><li><ul class="section"><li><a href="ch12-01-accepting-command-line-arguments.html"><strong>12.1.</strong> 接受命令行参数</a></li><li><a href="ch12-02-reading-a-file.html"><strong>12.2.</strong> 读取文件</a></li><li><a href="ch12-03-improving-error-handling-and-modularity.html"><strong>12.3.</strong> 重构以改进模块化与错误处理</a></li><li><a href="ch12-04-testing-the-librarys-functionality.html"><strong>12.4.</strong> 采用测试驱动开发完善库的功能</a></li><li><a href="ch12-05-working-with-environment-variables.html"><strong>12.5.</strong> 处理环境变量</a></li><li><a href="ch12-06-writing-to-stderr-instead-of-stdout.html"><strong>12.6.</strong> 将错误信息输出到标准错误而不是标准输出</a></li></ul></li><li><a href="ch13-00-functional-features.html"><strong>13.</strong> Rust 中的函数式语言功能：迭代器与闭包</a></li><li><ul class="section"><li><a href="ch13-01-closures.html"><strong>13.1.</strong> 闭包：可以捕获其环境的匿名函数</a></li><li><a href="ch13-02-iterators.html"><strong>13.2.</strong> 使用迭代器处理元素序列</a></li><li><a href="ch13-03-improving-our-io-project.html"><strong>13.3.</strong> 改进之前的 I/O 项目</a></li><li><a href="ch13-04-performance.html"><strong>13.4.</strong> 性能比较：循环对迭代器</a></li></ul></li><li><a href="ch14-00-more-about-cargo.html"><strong>14.</strong> 更多关于 Cargo 和 Crates.io 的内容</a></li><li><ul class="section"><li><a href="ch14-01-release-profiles.html" class="active"><strong>14.1.</strong> 采用发布配置自定义构建</a></li><li><a href="ch14-02-publishing-to-crates-io.html"><strong>14.2.</strong> 将 crate 发布到 Crates.io</a></li><li><a href="ch14-03-cargo-workspaces.html"><strong>14.3.</strong> Cargo 工作空间</a></li><li><a href="ch14-04-installing-binaries.html"><strong>14.4.</strong> 使用 <code>cargo install</code> 从 Crates.io 安装二进制文件</a></li><li><a href="ch14-05-extending-cargo.html"><strong>14.5.</strong> Cargo 自定义扩展命令</a></li></ul></li><li><a href="ch15-00-smart-pointers.html"><strong>15.</strong> 智能指针</a></li><li><ul class="section"><li><a href="ch15-01-box.html"><strong>15.1.</strong> <code>Box&lt;T&gt;</code> 在堆上存储数据，并且可确定大小</a></li><li><a href="ch15-02-deref.html"><strong>15.2.</strong> <code>Deref</code> Trait 允许通过引用访问数据</a></li><li><a href="ch15-03-drop.html"><strong>15.3.</strong> <code>Drop</code> Trait 运行清理代码</a></li><li><a href="ch15-04-rc.html"><strong>15.4.</strong> <code>Rc&lt;T&gt;</code> 引用计数智能指针</a></li><li><a href="ch15-05-interior-mutability.html"><strong>15.5.</strong> <code>RefCell&lt;T&gt;</code> 和内部可变性模式</a></li><li><a href="ch15-06-reference-cycles.html"><strong>15.6.</strong> 引用循环和内存泄漏是安全的</a></li></ul></li><li><a href="ch16-00-concurrency.html"><strong>16.</strong> 无畏并发</a></li><li><ul class="section"><li><a href="ch16-01-threads.html"><strong>16.1.</strong> 线程</a></li><li><a href="ch16-02-message-passing.html"><strong>16.2.</strong> 消息传递</a></li><li><a href="ch16-03-shared-state.html"><strong>16.3.</strong> 共享状态</a></li><li><a href="ch16-04-extensible-concurrency-sync-and-send.html"><strong>16.4.</strong> 可扩展的并发：<code>Sync</code>和<code>Send</code></a></li></ul></li><li><a href="ch17-00-oop.html"><strong>17.</strong> Rust 是面向对象语言吗？</a></li><li><ul class="section"><li><a href="ch17-01-what-is-oo.html"><strong>17.1.</strong> 什么是面向对象？</a></li><li><a href="ch17-02-trait-objects.html"><strong>17.2.</strong> 为使用不同类型的值而设计的 trait 对象</a></li><li><a href="ch17-03-oo-design-patterns.html"><strong>17.3.</strong> 面向对象设计模式的实现</a></li></ul></li><li><a href="ch18-00-patterns.html"><strong>18.</strong> 模式用来匹配值的结构</a></li><li><ul class="section"><li><a href="ch18-01-all-the-places-for-patterns.html"><strong>18.1.</strong> 所有可能会用到模式的位置</a></li><li><a href="ch18-02-refutability.html"><strong>18.2.</strong> Refutability：何时模式可能会匹配失败</a></li><li><a href="ch18-03-pattern-syntax.html"><strong>18.3.</strong> 模式的全部语法</a></li></ul></li><li><a href="ch19-00-advanced-features.html"><strong>19.</strong> 高级特征</a></li><li><ul class="section"><li><a href="ch19-01-unsafe-rust.html"><strong>19.1.</strong> 不安全的 Rust</a></li><li><a href="ch19-02-advanced-lifetimes.html"><strong>19.2.</strong> 高级生命周期</a></li><li><a href="ch19-03-advanced-traits.html"><strong>19.3.</strong> 高级 trait</a></li><li><a href="ch19-04-advanced-types.html"><strong>19.4.</strong> 高级类型</a></li><li><a href="ch19-05-advanced-functions-and-closures.html"><strong>19.5.</strong> 高级函数与闭包</a></li></ul></li><li><a href="ch20-00-final-project-a-web-server.html"><strong>20.</strong> 最后的项目: 构建多线程 web server</a></li><li><ul class="section"><li><a href="ch20-01-single-threaded.html"><strong>20.1.</strong> 单线程 web server</a></li><li><a href="ch20-02-slow-requests.html"><strong>20.2.</strong> 慢请求如何影响吞吐率</a></li><li><a href="ch20-03-designing-the-interface.html"><strong>20.3.</strong> 设计线程池接口</a></li><li><a href="ch20-04-storing-threads.html"><strong>20.4.</strong> 创建线程池并储存线程</a></li><li><a href="ch20-05-sending-requests-via-channels.html"><strong>20.5.</strong> 使用通道向线程发送请求</a></li><li><a href="ch20-06-graceful-shutdown-and-cleanup.html"><strong>20.6.</strong> Graceful Shutdown 与清理</a></li></ul></li><li><a href="appendix-00.html"><strong>21.</strong> 附录</a></li><li><ul class="section"><li><a href="appendix-01-keywords.html"><strong>21.1.</strong> A - 关键字</a></li><li><a href="appendix-02-operators.html"><strong>21.2.</strong> B - 运算符与符号</a></li><li><a href="appendix-03-derivable-traits.html"><strong>21.3.</strong> C - 可导出的 trait</a></li><li><a href="appendix-04-macros.html"><strong>21.4.</strong> D - 宏</a></li><li><a href="appendix-05-translation.html"><strong>21.5.</strong> E - 本书翻译</a></li><li><a href="appendix-06-newest-features.html"><strong>21.6.</strong> F - 最新功能</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper has-warning">
+
+            <div class="page" tabindex="-1">
+                
+                <header></header>
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">Rust 程序设计语言 简体中文版</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="ch14-01-release-profiles.html#发布配置" id="发布配置"><h2>发布配置</h2></a>
+<blockquote>
+<p><a href="https://github.com/rust-lang/book/blob/master/second-edition/src/ch14-01-release-profiles.md">ch14-01-release-profiles.md</a>
+<br>
+commit db6129a30d7c7baed34dd38dbc56f7ed8a66ae92</p>
+</blockquote>
+<p>在 Rust 中 <strong>发布配置</strong>（<em>release profiles</em>）是预定义的、可定制的带有不同选项的配置，他们允许程序员更多的控制代码编译的多种选项。每一个配置都彼此相互独立。</p>
+<p>Cargo 定义了四种有着良好默认值的可用于各自使用场景的配置。Cargo 根据运行的命令来选择不同的配置。不同命令所对应的配置如表格 14-1 所示：</p>
+<table><thead><tr><th> 命令                 </th><th> 配置   </th></tr></thead><tbody>
+<tr><td> <code>cargo build</code>           </td><td> <code>dev</code>     </td></tr>
+<tr><td> <code>cargo build --release</code> </td><td> <code>release</code> </td></tr>
+<tr><td> <code>cargo test</code>            </td><td> <code>test</code>    </td></tr>
+<tr><td> <code>cargo doc</code>             </td><td> <code>doc</code>     </td></tr>
+</tbody></table>
+<p><span class="caption">表格 14-1：运行不同 Cargo 命令所使用的配置</span></p>
+<p>这可能很熟悉，他们出现在构建的输出中，他们展示了构建中所使用的配置：</p>
+<pre><code class="language-text">$ cargo build
+    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs
+$ cargo build --release
+    Finished release [optimized] target(s) in 0.0 secs
+</code></pre>
+<p>这里的 “dev” 和 “release” 提示表明编译器在使用不同的配置。</p>
+<a class="header" href="ch14-01-release-profiles.html#定制发布配置" id="定制发布配置"><h3>定制发布配置</h3></a>
+<p>Cargo 对每一个配置都有默认设置，当项目的 <em>Cargo.toml</em> 文件的 <code>[profile.*]</code> 部分没有指定时使用。通过增加任何希望定制的配置对应的 <code>[profile.*]</code> 部分，我们可以选择覆盖任意默认设置的子集。例如，如下是 <code>dev</code> 和 <code>release</code> 配置的 <code>opt-level</code> 设置的默认值：</p>
+<pre><code class="language-toml">[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+</code></pre>
+<p><code>opt-level</code> 设置控制 Rust 会对代码进行何种程度的优化。这个配置的值从 0 到 3。越高的优化级别需要更多的时间编译，所以如果你在进行开发并经常编译，可能会希望在牺牲一些代码性能的情况下编译得快一些。这就是为什么 <code>dev</code> 的 <code>opt-level</code> 默认为 <code>0</code>。当你准备发布时，花费更多时间在编译上则更好。只需要在发布模式编译一次，而编译出来的程序则会运行很多次，所以发布模式用更长的编译时间换取运行更快的代码。这正是为什么 <code>release</code> 配置的 <code>opt-level</code> 默认为 <code>3</code>。</p>
+<p>我们可以选择通过在 <em>Cargo.toml</em> 增加不同的值来覆盖任何默认设置。比如，如果我们想要在开发配置中使用级别 1 的优化，则可以在 <em>Cargo.toml</em> 中增加这两行：</p>
+<p><span class="filename">文件名: Cargo.toml</span></p>
+<pre><code class="language-toml">[profile.dev]
+opt-level = 1
+</code></pre>
+<p>这会覆盖默认的设置 <code>0</code>。现在运行 <code>cargo build</code> 时，Cargo 将会使用 <code>dev</code> 的默认配置加上定制的 <code>opt-level</code>。因为 <code>opt-level</code> 设置为 <code>1</code>，Cargo 会比默认进行更多的优化，但是没有发布构建那么多。</p>
+<p>对于每个配置的设置和其默认值的完整列表，请查看<a href="http://doc.crates.io/">Cargo 的文档</a>。</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="ch14-00-more-about-cargo.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="ch14-02-publishing-to-crates-io.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="ch14-00-more-about-cargo.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="ch14-02-publishing-to-crates-io.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>不安全的 Rust - 不安全的 Rust - Rust 程序设计语言 简体中文版</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Rust 程序设计语言 简体中文版">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        <style>
+            .page-wrapper.has-warning > .nav-chapters {
+              /* add height for warning content & margin */
+              top: 120px;
+            }
+
+            p.warning {
+                background-color: rgb(242, 222, 222);
+                border-bottom-color: rgb(238, 211, 215);
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+                border-bottom-style: solid;
+                border-bottom-width: 0.666667px;
+                border-image-outset: 0 0 0 0;
+                border-image-repeat: stretch stretch;
+                border-image-slice: 100% 100% 100% 100%;
+                border-image-source: none;
+                border-image-width: 1 1 1 1;
+                border-left-color: rgb(238, 211, 215);
+                border-left-style: solid;
+                border-left-width: 0.666667px;
+                border-right-color: rgb(238, 211, 215);
+                border-right-style: solid;
+                border-right-width: 0.666667px;
+                border-top-color: rgb(238, 211, 215);
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border-top-style: solid;
+                border-top-width: 0.666667px;
+                color: rgb(185, 74, 72);
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 30px;
+                padding-bottom: 8px;
+                padding-left: 14px;
+                padding-right: 35px;
+                padding-top: 8px;
+            }
+            p.warning strong {
+                color: rgb(185, 74, 72)
+            }
+            p.warning a {
+                color: rgb(0, 136, 204)
+            }
+
+            a .hljs {
+                color: #4183c4;
+            }
+
+            .rust .content a .hljs,
+            .coal .content a .hljs,
+            .navy .content a .hljs {
+                color: #2b79a2;
+            }
+
+            a:hover .hljs {
+                text-decoration: underline;
+            }
+
+            /* Styles keystrokes such as ctrl-C */
+            .keystroke {
+                font-variant: small-caps;
+            }
+        </style>
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="ch01-00-introduction.html"><strong>1.</strong> 介绍</a></li><li><ul class="section"><li><a href="ch01-01-installation.html"><strong>1.1.</strong> 安装</a></li><li><a href="ch01-02-hello-world.html"><strong>1.2.</strong> Hello, World!</a></li></ul></li><li><a href="ch02-00-guessing-game-tutorial.html"><strong>2.</strong> 猜猜看教程</a></li><li><a href="ch03-00-common-programming-concepts.html"><strong>3.</strong> 通用编程概念</a></li><li><ul class="section"><li><a href="ch03-01-variables-and-mutability.html"><strong>3.1.</strong> 变量与可变性</a></li><li><a href="ch03-02-data-types.html"><strong>3.2.</strong> 数据类型</a></li><li><a href="ch03-03-how-functions-work.html"><strong>3.3.</strong> 函数如何工作</a></li><li><a href="ch03-04-comments.html"><strong>3.4.</strong> 注释</a></li><li><a href="ch03-05-control-flow.html"><strong>3.5.</strong> 控制流</a></li></ul></li><li><a href="ch04-00-understanding-ownership.html"><strong>4.</strong> 认识所有权</a></li><li><ul class="section"><li><a href="ch04-01-what-is-ownership.html"><strong>4.1.</strong> 什么是所有权</a></li><li><a href="ch04-02-references-and-borrowing.html"><strong>4.2.</strong> 引用与借用</a></li><li><a href="ch04-03-slices.html"><strong>4.3.</strong> Slices</a></li></ul></li><li><a href="ch05-00-structs.html"><strong>5.</strong> 使用结构体来组织相关联的数据</a></li><li><ul class="section"><li><a href="ch05-01-defining-structs.html"><strong>5.1.</strong> 定义并实例化结构体</a></li><li><a href="ch05-02-example-structs.html"><strong>5.2.</strong> 一个使用结构体的示例程序</a></li><li><a href="ch05-03-method-syntax.html"><strong>5.3.</strong> 方法语法</a></li></ul></li><li><a href="ch06-00-enums.html"><strong>6.</strong> 枚举与模式匹配</a></li><li><ul class="section"><li><a href="ch06-01-defining-an-enum.html"><strong>6.1.</strong> 定义枚举</a></li><li><a href="ch06-02-match.html"><strong>6.2.</strong> <code>match</code> 控制流运算符</a></li><li><a href="ch06-03-if-let.html"><strong>6.3.</strong> <code>if let</code> 简洁控制流</a></li></ul></li><li><a href="ch07-00-modules.html"><strong>7.</strong> 模块</a></li><li><ul class="section"><li><a href="ch07-01-mod-and-the-filesystem.html"><strong>7.1.</strong> <code>mod</code> 与文件系统</a></li><li><a href="ch07-02-controlling-visibility-with-pub.html"><strong>7.2.</strong> 使用 <code>pub</code> 控制可见性</a></li><li><a href="ch07-03-importing-names-with-use.html"><strong>7.3.</strong> 在不同的模块中引用命名</a></li></ul></li><li><a href="ch08-00-common-collections.html"><strong>8.</strong> 通用集合类型</a></li><li><ul class="section"><li><a href="ch08-01-vectors.html"><strong>8.1.</strong> vector</a></li><li><a href="ch08-02-strings.html"><strong>8.2.</strong> 字符串</a></li><li><a href="ch08-03-hash-maps.html"><strong>8.3.</strong> 哈希 map</a></li></ul></li><li><a href="ch09-00-error-handling.html"><strong>9.</strong> 错误处理</a></li><li><ul class="section"><li><a href="ch09-01-unrecoverable-errors-with-panic.html"><strong>9.1.</strong> <code>panic!</code> 与不可恢复的错误</a></li><li><a href="ch09-02-recoverable-errors-with-result.html"><strong>9.2.</strong> <code>Result</code> 与可恢复的错误</a></li><li><a href="ch09-03-to-panic-or-not-to-panic.html"><strong>9.3.</strong> <code>panic!</code> 还是不 <code>panic!</code></a></li></ul></li><li><a href="ch10-00-generics.html"><strong>10.</strong> 泛型、trait 与生命周期</a></li><li><ul class="section"><li><a href="ch10-01-syntax.html"><strong>10.1.</strong> 泛型数据类型</a></li><li><a href="ch10-02-traits.html"><strong>10.2.</strong> trait：定义共享的行为</a></li><li><a href="ch10-03-lifetime-syntax.html"><strong>10.3.</strong> 生命周期与引用有效性</a></li></ul></li><li><a href="ch11-00-testing.html"><strong>11.</strong> 测试</a></li><li><ul class="section"><li><a href="ch11-01-writing-tests.html"><strong>11.1.</strong> 编写测试</a></li><li><a href="ch11-02-running-tests.html"><strong>11.2.</strong> 运行测试</a></li><li><a href="ch11-03-test-organization.html"><strong>11.3.</strong> 测试的组织结构</a></li></ul></li><li><a href="ch12-00-an-io-project.html"><strong>12.</strong> 一个 I/O 项目：构建命令行程序</a></li><li><ul class="section"><li><a href="ch12-01-accepting-command-line-arguments.html"><strong>12.1.</strong> 接受命令行参数</a></li><li><a href="ch12-02-reading-a-file.html"><strong>12.2.</strong> 读取文件</a></li><li><a href="ch12-03-improving-error-handling-and-modularity.html"><strong>12.3.</strong> 重构以改进模块化与错误处理</a></li><li><a href="ch12-04-testing-the-librarys-functionality.html"><strong>12.4.</strong> 采用测试驱动开发完善库的功能</a></li><li><a href="ch12-05-working-with-environment-variables.html"><strong>12.5.</strong> 处理环境变量</a></li><li><a href="ch12-06-writing-to-stderr-instead-of-stdout.html"><strong>12.6.</strong> 将错误信息输出到标准错误而不是标准输出</a></li></ul></li><li><a href="ch13-00-functional-features.html"><strong>13.</strong> Rust 中的函数式语言功能：迭代器与闭包</a></li><li><ul class="section"><li><a href="ch13-01-closures.html"><strong>13.1.</strong> 闭包：可以捕获其环境的匿名函数</a></li><li><a href="ch13-02-iterators.html"><strong>13.2.</strong> 使用迭代器处理元素序列</a></li><li><a href="ch13-03-improving-our-io-project.html"><strong>13.3.</strong> 改进之前的 I/O 项目</a></li><li><a href="ch13-04-performance.html"><strong>13.4.</strong> 性能比较：循环对迭代器</a></li></ul></li><li><a href="ch14-00-more-about-cargo.html"><strong>14.</strong> 更多关于 Cargo 和 Crates.io 的内容</a></li><li><ul class="section"><li><a href="ch14-01-release-profiles.html"><strong>14.1.</strong> 采用发布配置自定义构建</a></li><li><a href="ch14-02-publishing-to-crates-io.html"><strong>14.2.</strong> 将 crate 发布到 Crates.io</a></li><li><a href="ch14-03-cargo-workspaces.html"><strong>14.3.</strong> Cargo 工作空间</a></li><li><a href="ch14-04-installing-binaries.html"><strong>14.4.</strong> 使用 <code>cargo install</code> 从 Crates.io 安装二进制文件</a></li><li><a href="ch14-05-extending-cargo.html"><strong>14.5.</strong> Cargo 自定义扩展命令</a></li></ul></li><li><a href="ch15-00-smart-pointers.html"><strong>15.</strong> 智能指针</a></li><li><ul class="section"><li><a href="ch15-01-box.html"><strong>15.1.</strong> <code>Box&lt;T&gt;</code> 在堆上存储数据，并且可确定大小</a></li><li><a href="ch15-02-deref.html"><strong>15.2.</strong> <code>Deref</code> Trait 允许通过引用访问数据</a></li><li><a href="ch15-03-drop.html"><strong>15.3.</strong> <code>Drop</code> Trait 运行清理代码</a></li><li><a href="ch15-04-rc.html"><strong>15.4.</strong> <code>Rc&lt;T&gt;</code> 引用计数智能指针</a></li><li><a href="ch15-05-interior-mutability.html"><strong>15.5.</strong> <code>RefCell&lt;T&gt;</code> 和内部可变性模式</a></li><li><a href="ch15-06-reference-cycles.html"><strong>15.6.</strong> 引用循环和内存泄漏是安全的</a></li></ul></li><li><a href="ch16-00-concurrency.html"><strong>16.</strong> 无畏并发</a></li><li><ul class="section"><li><a href="ch16-01-threads.html"><strong>16.1.</strong> 线程</a></li><li><a href="ch16-02-message-passing.html"><strong>16.2.</strong> 消息传递</a></li><li><a href="ch16-03-shared-state.html"><strong>16.3.</strong> 共享状态</a></li><li><a href="ch16-04-extensible-concurrency-sync-and-send.html"><strong>16.4.</strong> 可扩展的并发：<code>Sync</code>和<code>Send</code></a></li></ul></li><li><a href="ch17-00-oop.html"><strong>17.</strong> Rust 是面向对象语言吗？</a></li><li><ul class="section"><li><a href="ch17-01-what-is-oo.html"><strong>17.1.</strong> 什么是面向对象？</a></li><li><a href="ch17-02-trait-objects.html"><strong>17.2.</strong> 为使用不同类型的值而设计的 trait 对象</a></li><li><a href="ch17-03-oo-design-patterns.html"><strong>17.3.</strong> 面向对象设计模式的实现</a></li></ul></li><li><a href="ch18-00-patterns.html"><strong>18.</strong> 模式用来匹配值的结构</a></li><li><ul class="section"><li><a href="ch18-01-all-the-places-for-patterns.html"><strong>18.1.</strong> 所有可能会用到模式的位置</a></li><li><a href="ch18-02-refutability.html"><strong>18.2.</strong> Refutability：何时模式可能会匹配失败</a></li><li><a href="ch18-03-pattern-syntax.html"><strong>18.3.</strong> 模式的全部语法</a></li></ul></li><li><a href="ch19-00-advanced-features.html"><strong>19.</strong> 高级特征</a></li><li><ul class="section"><li><a href="ch19-01-unsafe-rust.html" class="active"><strong>19.1.</strong> 不安全的 Rust</a></li><li><a href="ch19-02-advanced-lifetimes.html"><strong>19.2.</strong> 高级生命周期</a></li><li><a href="ch19-03-advanced-traits.html"><strong>19.3.</strong> 高级 trait</a></li><li><a href="ch19-04-advanced-types.html"><strong>19.4.</strong> 高级类型</a></li><li><a href="ch19-05-advanced-functions-and-closures.html"><strong>19.5.</strong> 高级函数与闭包</a></li></ul></li><li><a href="ch20-00-final-project-a-web-server.html"><strong>20.</strong> 最后的项目: 构建多线程 web server</a></li><li><ul class="section"><li><a href="ch20-01-single-threaded.html"><strong>20.1.</strong> 单线程 web server</a></li><li><a href="ch20-02-slow-requests.html"><strong>20.2.</strong> 慢请求如何影响吞吐率</a></li><li><a href="ch20-03-designing-the-interface.html"><strong>20.3.</strong> 设计线程池接口</a></li><li><a href="ch20-04-storing-threads.html"><strong>20.4.</strong> 创建线程池并储存线程</a></li><li><a href="ch20-05-sending-requests-via-channels.html"><strong>20.5.</strong> 使用通道向线程发送请求</a></li><li><a href="ch20-06-graceful-shutdown-and-cleanup.html"><strong>20.6.</strong> Graceful Shutdown 与清理</a></li></ul></li><li><a href="appendix-00.html"><strong>21.</strong> 附录</a></li><li><ul class="section"><li><a href="appendix-01-keywords.html"><strong>21.1.</strong> A - 关键字</a></li><li><a href="appendix-02-operators.html"><strong>21.2.</strong> B - 运算符与符号</a></li><li><a href="appendix-03-derivable-traits.html"><strong>21.3.</strong> C - 可导出的 trait</a></li><li><a href="appendix-04-macros.html"><strong>21.4.</strong> D - 宏</a></li><li><a href="appendix-05-translation.html"><strong>21.5.</strong> E - 本书翻译</a></li><li><a href="appendix-06-newest-features.html"><strong>21.6.</strong> F - 最新功能</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper has-warning">
+
+            <div class="page" tabindex="-1">
+                
+                <header></header>
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">Rust 程序设计语言 简体中文版</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="ch19-01-unsafe-rust.html#不安全的rust" id="不安全的rust"><h2>不安全的Rust</h2></a>
+<p>在本书之前的章节, 我们讨论了Rust代码在编译时会强制保证内存安全. 然而, Rust还有另一个隐藏的语言特性, 这就是不安全的Rust, 它不会担保内存安全. 不安全的Rust和常规Rust代码无异, 但是它会给你安全的Rust代码不具备的超能力.</p>
+<p>不安全的Rust之所以存在, 本质上是因为编译器对代码的静态分析趋于保守. 代码何时保证内存安全, 何时放权这种担保呢? 把合法的代码拒绝掉通常比接纳非法的代码要好一点. 有些时候你的代码的确没问题, 但是Rust却不这样认为! 这时你可以用不安全的代码告诉编译器, &quot;相信我吧, 我知道我在做什么.&quot; 这样缺陷可能就在于你自己了; 如果你的不安全代码发生了错误, 比如对null指针解引用就可能会引发内存出错的大问题.</p>
+<p>还有另一个Rust需要不安全代码的原因: 底层电脑硬件固有的不安全性. 如果Rust不让你执行不安全的操作, 那么有些任务你就完成不了. 但是Rust需要你能够做像直接与操作系统交互甚至是写你自己的操作系统这样的底层操作! 这也是Rust语言的一部分目标, 所以我们需要一些来做这些事情的方法.</p>
+<a class="header" href="ch19-01-unsafe-rust.html#不安全的神力" id="不安全的神力"><h3>不安全的神力</h3></a>
+<p>我们通过使用<code>unsafe</code>关键字开启一个持有不安全代码的代码块来切换到不安全的Rust. 你可以在不安全的Rust中进行四个安全的Rust做不到的操作. 我们把它们称作&quot;不安全的神力&quot;. 之前我们没见过这几个特性是因为它们只用在<code>unsafe</code>代码块中! 它们是:</p>
+<ol>
+<li>解引用原生指针</li>
+<li>调用一个不安全的函数或方法</li>
+<li>访问或修改一个不可变的静态变量</li>
+<li>实现一个不安全的trait</li>
+</ol>
+<p>记住这一点很重要, <code>unsafe</code>不会关掉借用检查器也不会禁用其它的Rust安全性检查: 如果你在不安全的代码中用了引用, 它仍将会被检查. <code>unsafe</code>关键字做的唯一的一件事是让你存取编译器因内存安全性而没去检查的上述四个特性.在一个unsafe代码块中你仍然会获得某种程度的安全性! 此外, <code>unsafe</code>并不是说代码块中的代码是危险的或者有内存安全性问题: 它只是表明作为程序员的你关掉了编译器检查, 你将确保<code>unsafe</code>代码块会拥有合理的内存.</p>
+<p>人是会犯错误的, 错误总会发生. 在<code>unsafe</code>代码块中执行上述四个不安全的操作时, 如果你犯了错误并得到一个内存安全性的错误, 你必定会知道它与你使用不安全的代码有关. 这样就更容易处理内存安全性的bug, 因为Rust已经帮我们把其它的代码做了检查. 能缩小排查内存安全性bug的出现区域当然好, 所以尽量缩小你的不安全代码的数量吧. 当修正内存安全问题时, <code>unsafe</code>代码块中的任何代码都可能出错: 所以让<code>unsafe</code>代码块尽可能的小吧, 以后你需要排查的代码也会少一些.</p>
+<p>为了尽可能隔离不安全的代码, 在安全的抽象中包含不安全的代码并提供一个安全的API是一个好主意, 当我们学习不安全的函数和方法时我们会讨论它. 标准库中有些不安全的代码被实现为安全的抽象, 它们中的部分已被审核过了. 当你或者你的用户使用通过<code>unsafe</code>代码实现的功能时, 因为使用一个安全的抽象是安全的, 这样就可以避免到处都是<code>unsafe</code>字样.</p>
+<p>让我们按顺序依次介绍上述四个不安全的神力, 同时我们会见到一些抽象, 它们为不安全的代码提供了安全的接口.</p>
+<a class="header" href="ch19-01-unsafe-rust.html#解引用原生指针" id="解引用原生指针"><h3>解引用原生指针</h3></a>
+<p>回到第4章, 我们在哪里学习了引用. 我们知道编译器会确保引用永远合法. 不安全的Rust有两个类似于引用的被称为<em>原生指针</em>(<em>raw pointers</em>)的新类型. 和引用一样, 我们可以有一个不可变的原生指针和一个可变的原生指针. 在原生指针的上下文中, &quot;不可变&quot;意味着指针不能直接被解引用和被赋值. 例19-1演示了如何通过引用来创建一个原生指针:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let mut num = 5;
+
+let r1 = &amp;num as *const i32;
+let r2 = &amp;mut num as *mut i32;
+#}</code></pre></pre>
+<p><span class="caption">例19-1: 通过引用创建原生指针</span></p>
+<p>上例中<code>*const T</code>类型是一个不可变的原生指针, <code>*mut T</code>是一个可变的原生指针. 我们通过使用<code>as</code>把一个可变的和一个不可变的引用转换成它们对应的原生指针类型来创建原生指针. 与引用不同, 这些指针的合法性不能得到保证.</p>
+<p>例19-2演示了如何创建一个指向内存中任意地址的原生指针. 试图随便访问内存地址所带来的结果是难以预测的: 也许在那个地址处有数据, 也许在那个地址处没有任何数据, 编译器也可能会优化代码导致那块内存不能访问, 亦或你的程序可能会发生段错误. 虽然可以写出下面的代码, 但是通常找不到好的理由来这样做:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let address = 0x012345;
+let r = address as *const i32;
+#}</code></pre></pre>
+<p><span class="caption">例子19-2: 创建一个指向任意内存地址的原生指针</span></p>
+<p>注意在例19-1和19-2中没有<code>unsafe</code>代码块. 你可以在安全代码中<em>创建</em>原生指针
+raw pointers in safe code, 但是你不能在安全代码中<em>解引用</em>(<em>dereference</em>)原生指针来读取被指针指向的数据. 如例19-3所示, 对原生指针解引用需要在<code>unsafe</code>代码块中使用解引用操作符<code>*</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let mut num = 5;
+
+let r1 = &amp;num as *const i32;
+let r2 = &amp;mut num as *mut i32;
+
+unsafe {
+    println!(&quot;r1 is: {}&quot;, *r1);
+    println!(&quot;r2 is: {}&quot;, *r2);
+}
+#}</code></pre></pre>
+<p><span class="caption">例19-3: 在<code>unsafe</code>代码块中解引用原生指针</span></p>
+<p>创建一个指针不会造成任何危险; 只有在你访问指针指向的值时可能出问题, 因为你可能会用它处理无效的值.</p>
+<p>注意在19-1和19-3中我们创建的一个<code>*const i32</code>和一个<code>*mut i32</code>都指向同一个内存位置, 也就是<code>num</code>. 如果我们尝试创建一个不可变的和可变的<code>num</code>的引用而不是原生指针, 这就不能被编译, 因为我们不能在使用了不可变引用的同时再对同一个值进行可变引用. 通过原生指针, 我们能创建指向同一个内存位置的可变指针和不可变指针, 我们可以通过可变指针来改变数据, 但是要小心, 因为这可能会产生数据竞争!</p>
+<p>既然存在这么多的危险, 为什么我们还要使用原生指针呢? 一个主要的原因是为了与C代码交互, 在下一节的不安全函数里我们将会看到. 另一个原因是创建一个借用检查器理解不了的安全的抽象. 下面让我们介绍不安全的函数, 然后再看一个使用了不安全代码的安全的抽象的例子.</p>
+<a class="header" href="ch19-01-unsafe-rust.html#调用一个不安全的函数或方法" id="调用一个不安全的函数或方法"><h3>调用一个不安全的函数或方法</h3></a>
+<p>需要一个不安全的代码块的才能执行的第二个操作是调用不安全的函数. 不安全的函数和方法与常规的函数和方法看上去没有什么异样, 只是他们前面有一个额外的<code>unsafe</code>关键字. 不安全的函数的函数体自然是<code>unsafe</code>的代码块. 下例是一个名叫<code>dangerous</code>的不安全的函数:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+unsafe fn dangerous() {}
+
+unsafe {
+    dangerous();
+}
+#}</code></pre></pre>
+<p>如果不用<code>unsafe</code>代码块来调用<code>dangerous</code>, 我们将会得到下面的错误:</p>
+<pre><code class="language-text">error[E0133]: call to unsafe function requires unsafe function or block
+ --&gt; &lt;anon&gt;:4:5
+  |
+4 |     dangerous();
+  |     ^^^^^^^^^^^ call to unsafe function
+</code></pre>
+<p>通过把对<code>dangerous</code>的调用放到<code>unsafe</code>代码块中, 我们表明我们已经阅读了该函数的文档, 我们明白如何正确的使用它, 并且我们已经验证了调用的正确性.</p>
+<a class="header" href="ch19-01-unsafe-rust.html#创建一个不安全的代码上的安全的抽象" id="创建一个不安全的代码上的安全的抽象"><h4>创建一个不安全的代码上的安全的抽象</h4></a>
+<p>让我们用标准库中的某个函数比如<code>split_at_mut</code>来举个例子, 然后来探讨我们如何自己来实现它. 这个方法被定义在一个可变的切片(slice)上, 它通过参数指定的索引把一个切片分割成两个, 如例19-4所示:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let mut v = vec![1, 2, 3, 4, 5, 6];
+
+let r = &amp;mut v[..];
+
+let (a, b) = r.split_at_mut(3);
+
+assert_eq!(a, &amp;mut [1, 2, 3]);
+assert_eq!(b, &amp;mut [4, 5, 6]);
+#}</code></pre></pre>
+<p><span class="caption">例19-4: 使用安全的<code>split_at_mut</code>函数</span></p>
+<p>用安全的Rust代码是不能实现这个函数的. 如果要试一下用安全的Rust来实现它可以参考例19-5. 简单起见, 我们把<code>split_at_mut</code>实现成一个函数而不是一个方法, 这个函数只处理<code>i32</code>类型的切片而不是泛型类型<code>T</code>的切片:</p>
+<pre><code class="language-rust ignore">fn split_at_mut(slice: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) {
+    let len = slice.len();
+
+    assert!(mid &lt;= len);
+
+    (&amp;mut slice[..mid],
+     &amp;mut slice[mid..])
+}
+</code></pre>
+<p><span class="caption">例19-5: 尝试用安全的Rust来实现<code>split_at_mut</code></span></p>
+<p>该函数先取得切片(slice)的长度, 然后通过检查参数是否小于或等于这个长度来断言参数给定的索引位于切片(slice)当中. 这个断言意味着如果我们传入的索引比要分割的切片(slice)的长度大, 这个函数就会在使用这个索引前中断(panic).</p>
+<p>接着我们在一个元组中返回两个可变的切片(slice): 一个从被分割的切片的头部开始直到<code>mid</code>索引的前一个元素中止, 另一个从被分割的切片的<code>mid</code>索引开始直到被分割的切片的末尾结束.</p>
+<p>如果我们编译上面的代码, 我们将得到一个错误:</p>
+<pre><code class="language-text">error[E0499]: cannot borrow `*slice` as mutable more than once at a time
+ --&gt; &lt;anon&gt;:6:11
+  |
+5 |     (&amp;mut slice[..mid],
+  |           ----- first mutable borrow occurs here
+6 |      &amp;mut slice[mid..])
+  |           ^^^^^ second mutable borrow occurs here
+7 | }
+  | - first borrow ends here
+</code></pre>
+<p>Rust的借用检查器不能理解为什么我们要借用这个切片(slice)的不同部分; 它只知道我们对同一个切片借用了两次. 借用一个切片(slice)的不同部分在功能上是没问题的; 而且我们的两个<code>&amp;mut [i32]</code>也没有重叠. 但是Rust并没有聪明到能明白这一点. 当我们知道有些东西是可以的但是Rust却不知道的时候就是时候使用不安全的代码了.</p>
+<p>例子19-6演示了如何用一个<code>unsafe</code>代码块、 一个原生指针和一个不安全的函数调用来实现<code>split_at_mut</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+use std::slice;
+
+fn split_at_mut(slice: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) {
+    let len = slice.len();
+    let ptr = slice.as_mut_ptr();
+
+    assert!(mid &lt;= len);
+
+    unsafe {
+        (slice::from_raw_parts_mut(ptr, mid),
+         slice::from_raw_parts_mut(ptr.offset(mid as isize), len - mid))
+    }
+}
+#}</code></pre></pre>
+<p><span class="caption">例19-6: 用不安全的代码来实现<code>split_at_mut</code></span></p>
+<p>回顾一下第4章, 切片(slice)是一个指向某个数据的指针和这个切片(slice)的长度. 我们经常用<code>len</code>方法来取得切片的长度; 也可以用<code>as_mut_ptr</code>方法来访问切片的原生指针. 在这个例子里, 因为我们有一个可变的<code>i32</code>类型的切片, <code>as_mut_ptr</code>返回一个<code>*mut i32</code>类型的原生指针, 我们把它存放在变量<code>ptr</code>里.</p>
+<p>对索引<code>mid</code>合法性的断言上面已经介绍过了. 函数<code>slice::from_raw_parts_mut</code>的行为与<code>as_mut_ptr</code>和<code>len</code>方法相反: 它以一个原生指针和一个长度为参数并返回一个切片(slice). 我们调用<code>slice::from_raw_parts_mut</code>来创建一个从<code>ptr</code>开始且拥有<code>mid</code>个元素的切片. 然后我们以<code>mid</code>为参数调用<code>prt</code>上的<code>offset</code>方法来得到一个从索引<code>mid</code>开始的原生指针, 然后我们用这个原生指针和索引<code>mid</code>之后的元素个数为参数创建一个切片.</p>
+<p>因为切片(slice)会被检查, 所以一旦我们创建了它就可以安全使用. 函数<code>slice::from_raw_parts_mut</code>是一个不安全的函数因为它有一个原生指针参数, 而且它相信这个指针是有效的. 原生指针的<code>offset</code>方法也是不安全的, 因为它相信一个原生指针的位置偏移一些后也是一个有效的指针. 为了能调用<code>slice::from_raw_parts_mut</code>和<code>offset</code>, 我们把他们的调用放到一个<code>unsafe</code>代码块中, 我们可以通过查看代码并添加<code>mid</code>不大于<code>len</code>的断言来表明<code>unsafe</code>代码块中的原生指针是指向切片中的数据的有效指针. 这是一个<code>unsafe</code>恰当用法.</p>
+<p>注意结果<code>split_at_mut</code>函数是安全的: 我们不用在它的前面添加<code>unsafe</code>关键字, 并且我们可以从安全的Rust代码中调用它. 我们通过写一个使用了<code>unsafe</code>代码的函数来创建不安全代码的安全抽象, 上例用一种安全的方式通过函数访问的数据来创建有效的指针.</p>
+<p>相反, 当使用切片(slice)时, 例19-7中<code>slice::from_raw_parts_mut</code>的用法很可能会崩溃. 下面的代码用一个随意的内存地址来创建一个有10000个元素的切片:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+use std::slice;
+
+let address = 0x012345;
+let r = address as *mut i32;
+
+let slice = unsafe {
+    slice::from_raw_parts_mut(r, 10000)
+};
+#}</code></pre></pre>
+<p><span class="caption">例19-7: 通过一个任意的内存位置来创建一个切片</span></p>
+<p>我们不能拥有任意地址的内存, 也不能保证这个代码创建的切片会包含有效的<code>i32</code>类型的值. 试图使用臆测是有效切片的<code>slice</code>的行为是难以预测的.</p>
+<a class="header" href="ch19-01-unsafe-rust.html#调用外部代码的extern函数是不安全的" id="调用外部代码的extern函数是不安全的"><h4>调用外部代码的<code>extern</code>函数是不安全的</h4></a>
+<p>有时, 你的Rust代码需要与其它语言交互. Rust有一个<code>extern</code>关键字可以实现这个功能, 这有助于创建并使用<em>外部功能接口(Foreign Function Interface)</em> (FFI). 例19-8演示了如何与定义在一个非Rust语言编写的外部库中的<code>some_function</code>进行交互. 在Rust中调用<code>extern</code>声明的代码块永远都是不安全的:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><code class="language-rust ignore">extern &quot;C&quot; {
+    fn some_function();
+}
+
+fn main() {
+    unsafe { some_function() };
+}
+</code></pre>
+<p><span class="caption">例19-8: 声明并调用一个用其它语言写成的函数</span></p>
+<p>在<code>extern &quot;C&quot;</code>代码块中, 我们列出了我们想调用的用其它语言实现的库中定义的函数名和这个函数的特征签名.<code>&quot;C&quot;</code>定义了外部函数使用了哪种<em>应用程序接口(application binary interface)</em> (ABI). ABI定义了如何在汇编层调研这个函数. <code>&quot;C&quot;</code>是最常用的遵循C语言的ABI.</p>
+<p>调用一个外部函数总是不安全的. 如果我们要调用其他语言, 这种语言却不会遵循Rust的安全保证. 因为Rust不能检查外部代码是否是安全的, 我们只负责检查外部代码的安全性来表明我们已经用<code>unsafe</code>代码块来调用外部函数了.</p>
+<!-- PROD: START BOX -->
+<a class="header" href="ch19-01-unsafe-rust.html#通过其它语言来调用rust函数" id="通过其它语言来调用rust函数"><h5>通过其它语言来调用Rust函数</h5></a>
+<p><code>extern</code>关键字也总是被用来创建一个允许被其他语言调用的Rust函数. 与<code>extern</code>代码块不同, 我们可以在<code>fn</code>关键字之前添加<code>extern</code>关键字并指定要使用的ABI. 我们也加入注解<code>#[no_mangle]</code>来告诉Rust编译器不要取消这个函数的名字. 一旦我们把下例的代码编译成一个共享库并链接到C, 这个<code>call_from_c</code>函数就可以被C代码访问了:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[no_mangle]
+pub extern &quot;C&quot; fn call_from_c() {
+    println!(&quot;Just called a Rust function from C!&quot;);
+}
+#}</code></pre></pre>
+<p>上例的<code>extern</code>不需要<code>unsafe</code>就可以直接用</p>
+<!-- PROD: END BOX -->
+<a class="header" href="ch19-01-unsafe-rust.html#访问或修改一个可变的静态变量" id="访问或修改一个可变的静态变量"><h3>访问或修改一个可变的静态变量</h3></a>
+<p>目前为止本书还没有<em>讨论全局变量(global variables)</em>. 很多语言都支持全局变量, 当然Rust也不例外. 然而全局变量也有问题: 比如, 如果两个线程访问同一个可变的全局变量有可能会发生数据竞争.</p>
+<p>全局变量在Rust中被称为是*静态(static)*变量. 例19-9中声明并使用了一个字符串切片类型的静态变量:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">static HELLO_WORLD: &amp;str = &quot;Hello, world!&quot;;
+
+fn main() {
+    println!(&quot;name is: {}&quot;, HELLO_WORLD);
+}
+</code></pre></pre>
+<p><span class="caption">例19-9: 定义和使用一个不可变的静态变量</span></p>
+<p><code>static</code>变量类似于常量: 按照惯例它们的命名遵从<code>SCREAMING_SNAKE_CASE(用下划线分割的全大写字母)</code>风格, 我们也<em>必须</em>注明变量的类型, 本例中是<code>&amp;'static str</code>. 只有定义为<code>'static</code>的生命期才可以被存储在一个静态变量中. 也正因为此, Rust编译器自己就已经很清楚静态变量的生命期了, 所以我们也不需要明确地注明它了. 访问不可变的静态变量是安全的. 因为静态变量的值有一个固定的内存地址, 所以使用该值的时候总会得到同样的数据. 另一方面, 当常量被使用时, 复制它们的数据也是被允许的.</p>
+<p>静态变量与常量的另一个不同是静态变量可以是可变的. 访问和修改可变的静态变量都是不安全的. 例19-10演示了如何声明、访问和修改一个名叫<code>COUNTER</code>的可变的静态变量:</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">static mut COUNTER: u32 = 0;
+
+fn add_to_count(inc: u32) {
+    unsafe {
+        COUNTER += inc;
+    }
+}
+
+fn main() {
+    add_to_count(3);
+
+    unsafe {
+        println!(&quot;COUNTER: {}&quot;, COUNTER);
+    }
+}
+</code></pre></pre>
+<p><span class="caption">例19-10: 读取或修改一个可变的静态变量是不安全的</span></p>
+<p>与常规变量一样, 我们用<code>mut</code>关键字来表明这个静态变量是可变的. 每次我们对<code>COUNTER</code>的读写都必须被放到一个<code>unsafe</code>代码块中. 上面的代码编译运行会打印<code>COUNTER: 3</code>, 这正如我们期望的那样, 因为程序现在是一个单线程, 如果有多个线程访问<code>COUNTER</code>就可能会导致数据竞争.</p>
+<p>可全局访问的可变数据难于管理也很难保证没有数据竞争, 这也正是Rust认为可变的静态变量是不安全的原因. 如果可能, 请使用在第16章中介绍的并发技术和线程安全的智能指针, 这样可以让编译器从不同的线程检查被访问的数据是安全的.</p>
+<a class="header" href="ch19-01-unsafe-rust.html#实现一个不安全的trait" id="实现一个不安全的trait"><h3>实现一个不安全的Trait</h3></a>
+<p>最后, 当我们使用<code>unsafe</code>关键字时最后一个只在不安全的代码中才能做的事是实现一个不安全的trait. 我们可以在<code>trait</code>之前添加一个<code>unsafe</code>关键字来声明一个trait是不安全的, 以后实现这个trait的时候也必须标记一个<code>unsafe</code>关键字, 如19-11所示:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+unsafe trait Foo {
+    // methods go here
+}
+
+unsafe impl Foo for i32 {
+    // method implementations go here
+}
+#}</code></pre></pre>
+<p><span class="caption">例19-11: 定义并实现一个不安全的trait</span></p>
+<p>与不安全的函数类似, 一个不安全的trait中的方法也有一些编译器无法验证的盲点. 通过使用<code>unsafe impl</code>, 我们就是在说明我们来保证这些有疑虑的地方的安全.</p>
+<p>举个例子, 回想一下第16章中的<code>Sync</code>和<code>Send</code>这两个标记trait, 如果我们的类型全部由<code>Send</code>和<code>Sync</code>类型组合而成, 编译器会自动实现它们. 如果我们要实现的一个类型包含了不是<code>Send</code>或<code>Sync</code>的东西, 比如原生指针, 若是我们像把我们的类型标记成<code>Send</code>或<code>Sync</code>, 这就要求使用<code>unsafe</code>关键字. Rust不能验证我们的类型能保证可以安全地跨线程发送或从多个线程访问, 所以我们需要用<code>unsafe</code>关键字来表明我们会自己来做这些检查.</p>
+<p>使用<code>unsafe</code>来执行这四个动作之一是没有问题的, 因为编译器不能确保内存安全, 所以把
+<code>unsafe</code>代码写正确也实属不易. 当你需要使用<code>unsafe</code>代码时, 你可以这样做, 明确注明<code>unsafe</code>, 这样如果出现问题可以更容易地追踪问题的源头.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="ch19-00-advanced-features.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="ch19-02-advanced-lifetimes.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="ch19-00-advanced-features.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="ch19-02-advanced-lifetimes.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

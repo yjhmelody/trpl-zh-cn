@@ -1,0 +1,475 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>为使用不同类型的值而设计的 trait 对象 - 为使用不同类型的值而设计的 trait 对象 - Rust 程序设计语言 简体中文版</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Rust 程序设计语言 简体中文版">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        <style>
+            .page-wrapper.has-warning > .nav-chapters {
+              /* add height for warning content & margin */
+              top: 120px;
+            }
+
+            p.warning {
+                background-color: rgb(242, 222, 222);
+                border-bottom-color: rgb(238, 211, 215);
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+                border-bottom-style: solid;
+                border-bottom-width: 0.666667px;
+                border-image-outset: 0 0 0 0;
+                border-image-repeat: stretch stretch;
+                border-image-slice: 100% 100% 100% 100%;
+                border-image-source: none;
+                border-image-width: 1 1 1 1;
+                border-left-color: rgb(238, 211, 215);
+                border-left-style: solid;
+                border-left-width: 0.666667px;
+                border-right-color: rgb(238, 211, 215);
+                border-right-style: solid;
+                border-right-width: 0.666667px;
+                border-top-color: rgb(238, 211, 215);
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border-top-style: solid;
+                border-top-width: 0.666667px;
+                color: rgb(185, 74, 72);
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 30px;
+                padding-bottom: 8px;
+                padding-left: 14px;
+                padding-right: 35px;
+                padding-top: 8px;
+            }
+            p.warning strong {
+                color: rgb(185, 74, 72)
+            }
+            p.warning a {
+                color: rgb(0, 136, 204)
+            }
+
+            a .hljs {
+                color: #4183c4;
+            }
+
+            .rust .content a .hljs,
+            .coal .content a .hljs,
+            .navy .content a .hljs {
+                color: #2b79a2;
+            }
+
+            a:hover .hljs {
+                text-decoration: underline;
+            }
+
+            /* Styles keystrokes such as ctrl-C */
+            .keystroke {
+                font-variant: small-caps;
+            }
+        </style>
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="ch01-00-introduction.html"><strong>1.</strong> 介绍</a></li><li><ul class="section"><li><a href="ch01-01-installation.html"><strong>1.1.</strong> 安装</a></li><li><a href="ch01-02-hello-world.html"><strong>1.2.</strong> Hello, World!</a></li></ul></li><li><a href="ch02-00-guessing-game-tutorial.html"><strong>2.</strong> 猜猜看教程</a></li><li><a href="ch03-00-common-programming-concepts.html"><strong>3.</strong> 通用编程概念</a></li><li><ul class="section"><li><a href="ch03-01-variables-and-mutability.html"><strong>3.1.</strong> 变量与可变性</a></li><li><a href="ch03-02-data-types.html"><strong>3.2.</strong> 数据类型</a></li><li><a href="ch03-03-how-functions-work.html"><strong>3.3.</strong> 函数如何工作</a></li><li><a href="ch03-04-comments.html"><strong>3.4.</strong> 注释</a></li><li><a href="ch03-05-control-flow.html"><strong>3.5.</strong> 控制流</a></li></ul></li><li><a href="ch04-00-understanding-ownership.html"><strong>4.</strong> 认识所有权</a></li><li><ul class="section"><li><a href="ch04-01-what-is-ownership.html"><strong>4.1.</strong> 什么是所有权</a></li><li><a href="ch04-02-references-and-borrowing.html"><strong>4.2.</strong> 引用与借用</a></li><li><a href="ch04-03-slices.html"><strong>4.3.</strong> Slices</a></li></ul></li><li><a href="ch05-00-structs.html"><strong>5.</strong> 使用结构体来组织相关联的数据</a></li><li><ul class="section"><li><a href="ch05-01-defining-structs.html"><strong>5.1.</strong> 定义并实例化结构体</a></li><li><a href="ch05-02-example-structs.html"><strong>5.2.</strong> 一个使用结构体的示例程序</a></li><li><a href="ch05-03-method-syntax.html"><strong>5.3.</strong> 方法语法</a></li></ul></li><li><a href="ch06-00-enums.html"><strong>6.</strong> 枚举与模式匹配</a></li><li><ul class="section"><li><a href="ch06-01-defining-an-enum.html"><strong>6.1.</strong> 定义枚举</a></li><li><a href="ch06-02-match.html"><strong>6.2.</strong> <code>match</code> 控制流运算符</a></li><li><a href="ch06-03-if-let.html"><strong>6.3.</strong> <code>if let</code> 简洁控制流</a></li></ul></li><li><a href="ch07-00-modules.html"><strong>7.</strong> 模块</a></li><li><ul class="section"><li><a href="ch07-01-mod-and-the-filesystem.html"><strong>7.1.</strong> <code>mod</code> 与文件系统</a></li><li><a href="ch07-02-controlling-visibility-with-pub.html"><strong>7.2.</strong> 使用 <code>pub</code> 控制可见性</a></li><li><a href="ch07-03-importing-names-with-use.html"><strong>7.3.</strong> 在不同的模块中引用命名</a></li></ul></li><li><a href="ch08-00-common-collections.html"><strong>8.</strong> 通用集合类型</a></li><li><ul class="section"><li><a href="ch08-01-vectors.html"><strong>8.1.</strong> vector</a></li><li><a href="ch08-02-strings.html"><strong>8.2.</strong> 字符串</a></li><li><a href="ch08-03-hash-maps.html"><strong>8.3.</strong> 哈希 map</a></li></ul></li><li><a href="ch09-00-error-handling.html"><strong>9.</strong> 错误处理</a></li><li><ul class="section"><li><a href="ch09-01-unrecoverable-errors-with-panic.html"><strong>9.1.</strong> <code>panic!</code> 与不可恢复的错误</a></li><li><a href="ch09-02-recoverable-errors-with-result.html"><strong>9.2.</strong> <code>Result</code> 与可恢复的错误</a></li><li><a href="ch09-03-to-panic-or-not-to-panic.html"><strong>9.3.</strong> <code>panic!</code> 还是不 <code>panic!</code></a></li></ul></li><li><a href="ch10-00-generics.html"><strong>10.</strong> 泛型、trait 与生命周期</a></li><li><ul class="section"><li><a href="ch10-01-syntax.html"><strong>10.1.</strong> 泛型数据类型</a></li><li><a href="ch10-02-traits.html"><strong>10.2.</strong> trait：定义共享的行为</a></li><li><a href="ch10-03-lifetime-syntax.html"><strong>10.3.</strong> 生命周期与引用有效性</a></li></ul></li><li><a href="ch11-00-testing.html"><strong>11.</strong> 测试</a></li><li><ul class="section"><li><a href="ch11-01-writing-tests.html"><strong>11.1.</strong> 编写测试</a></li><li><a href="ch11-02-running-tests.html"><strong>11.2.</strong> 运行测试</a></li><li><a href="ch11-03-test-organization.html"><strong>11.3.</strong> 测试的组织结构</a></li></ul></li><li><a href="ch12-00-an-io-project.html"><strong>12.</strong> 一个 I/O 项目：构建命令行程序</a></li><li><ul class="section"><li><a href="ch12-01-accepting-command-line-arguments.html"><strong>12.1.</strong> 接受命令行参数</a></li><li><a href="ch12-02-reading-a-file.html"><strong>12.2.</strong> 读取文件</a></li><li><a href="ch12-03-improving-error-handling-and-modularity.html"><strong>12.3.</strong> 重构以改进模块化与错误处理</a></li><li><a href="ch12-04-testing-the-librarys-functionality.html"><strong>12.4.</strong> 采用测试驱动开发完善库的功能</a></li><li><a href="ch12-05-working-with-environment-variables.html"><strong>12.5.</strong> 处理环境变量</a></li><li><a href="ch12-06-writing-to-stderr-instead-of-stdout.html"><strong>12.6.</strong> 将错误信息输出到标准错误而不是标准输出</a></li></ul></li><li><a href="ch13-00-functional-features.html"><strong>13.</strong> Rust 中的函数式语言功能：迭代器与闭包</a></li><li><ul class="section"><li><a href="ch13-01-closures.html"><strong>13.1.</strong> 闭包：可以捕获其环境的匿名函数</a></li><li><a href="ch13-02-iterators.html"><strong>13.2.</strong> 使用迭代器处理元素序列</a></li><li><a href="ch13-03-improving-our-io-project.html"><strong>13.3.</strong> 改进之前的 I/O 项目</a></li><li><a href="ch13-04-performance.html"><strong>13.4.</strong> 性能比较：循环对迭代器</a></li></ul></li><li><a href="ch14-00-more-about-cargo.html"><strong>14.</strong> 更多关于 Cargo 和 Crates.io 的内容</a></li><li><ul class="section"><li><a href="ch14-01-release-profiles.html"><strong>14.1.</strong> 采用发布配置自定义构建</a></li><li><a href="ch14-02-publishing-to-crates-io.html"><strong>14.2.</strong> 将 crate 发布到 Crates.io</a></li><li><a href="ch14-03-cargo-workspaces.html"><strong>14.3.</strong> Cargo 工作空间</a></li><li><a href="ch14-04-installing-binaries.html"><strong>14.4.</strong> 使用 <code>cargo install</code> 从 Crates.io 安装二进制文件</a></li><li><a href="ch14-05-extending-cargo.html"><strong>14.5.</strong> Cargo 自定义扩展命令</a></li></ul></li><li><a href="ch15-00-smart-pointers.html"><strong>15.</strong> 智能指针</a></li><li><ul class="section"><li><a href="ch15-01-box.html"><strong>15.1.</strong> <code>Box&lt;T&gt;</code> 在堆上存储数据，并且可确定大小</a></li><li><a href="ch15-02-deref.html"><strong>15.2.</strong> <code>Deref</code> Trait 允许通过引用访问数据</a></li><li><a href="ch15-03-drop.html"><strong>15.3.</strong> <code>Drop</code> Trait 运行清理代码</a></li><li><a href="ch15-04-rc.html"><strong>15.4.</strong> <code>Rc&lt;T&gt;</code> 引用计数智能指针</a></li><li><a href="ch15-05-interior-mutability.html"><strong>15.5.</strong> <code>RefCell&lt;T&gt;</code> 和内部可变性模式</a></li><li><a href="ch15-06-reference-cycles.html"><strong>15.6.</strong> 引用循环和内存泄漏是安全的</a></li></ul></li><li><a href="ch16-00-concurrency.html"><strong>16.</strong> 无畏并发</a></li><li><ul class="section"><li><a href="ch16-01-threads.html"><strong>16.1.</strong> 线程</a></li><li><a href="ch16-02-message-passing.html"><strong>16.2.</strong> 消息传递</a></li><li><a href="ch16-03-shared-state.html"><strong>16.3.</strong> 共享状态</a></li><li><a href="ch16-04-extensible-concurrency-sync-and-send.html"><strong>16.4.</strong> 可扩展的并发：<code>Sync</code>和<code>Send</code></a></li></ul></li><li><a href="ch17-00-oop.html"><strong>17.</strong> Rust 是面向对象语言吗？</a></li><li><ul class="section"><li><a href="ch17-01-what-is-oo.html"><strong>17.1.</strong> 什么是面向对象？</a></li><li><a href="ch17-02-trait-objects.html" class="active"><strong>17.2.</strong> 为使用不同类型的值而设计的 trait 对象</a></li><li><a href="ch17-03-oo-design-patterns.html"><strong>17.3.</strong> 面向对象设计模式的实现</a></li></ul></li><li><a href="ch18-00-patterns.html"><strong>18.</strong> 模式用来匹配值的结构</a></li><li><ul class="section"><li><a href="ch18-01-all-the-places-for-patterns.html"><strong>18.1.</strong> 所有可能会用到模式的位置</a></li><li><a href="ch18-02-refutability.html"><strong>18.2.</strong> Refutability：何时模式可能会匹配失败</a></li><li><a href="ch18-03-pattern-syntax.html"><strong>18.3.</strong> 模式的全部语法</a></li></ul></li><li><a href="ch19-00-advanced-features.html"><strong>19.</strong> 高级特征</a></li><li><ul class="section"><li><a href="ch19-01-unsafe-rust.html"><strong>19.1.</strong> 不安全的 Rust</a></li><li><a href="ch19-02-advanced-lifetimes.html"><strong>19.2.</strong> 高级生命周期</a></li><li><a href="ch19-03-advanced-traits.html"><strong>19.3.</strong> 高级 trait</a></li><li><a href="ch19-04-advanced-types.html"><strong>19.4.</strong> 高级类型</a></li><li><a href="ch19-05-advanced-functions-and-closures.html"><strong>19.5.</strong> 高级函数与闭包</a></li></ul></li><li><a href="ch20-00-final-project-a-web-server.html"><strong>20.</strong> 最后的项目: 构建多线程 web server</a></li><li><ul class="section"><li><a href="ch20-01-single-threaded.html"><strong>20.1.</strong> 单线程 web server</a></li><li><a href="ch20-02-slow-requests.html"><strong>20.2.</strong> 慢请求如何影响吞吐率</a></li><li><a href="ch20-03-designing-the-interface.html"><strong>20.3.</strong> 设计线程池接口</a></li><li><a href="ch20-04-storing-threads.html"><strong>20.4.</strong> 创建线程池并储存线程</a></li><li><a href="ch20-05-sending-requests-via-channels.html"><strong>20.5.</strong> 使用通道向线程发送请求</a></li><li><a href="ch20-06-graceful-shutdown-and-cleanup.html"><strong>20.6.</strong> Graceful Shutdown 与清理</a></li></ul></li><li><a href="appendix-00.html"><strong>21.</strong> 附录</a></li><li><ul class="section"><li><a href="appendix-01-keywords.html"><strong>21.1.</strong> A - 关键字</a></li><li><a href="appendix-02-operators.html"><strong>21.2.</strong> B - 运算符与符号</a></li><li><a href="appendix-03-derivable-traits.html"><strong>21.3.</strong> C - 可导出的 trait</a></li><li><a href="appendix-04-macros.html"><strong>21.4.</strong> D - 宏</a></li><li><a href="appendix-05-translation.html"><strong>21.5.</strong> E - 本书翻译</a></li><li><a href="appendix-06-newest-features.html"><strong>21.6.</strong> F - 最新功能</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper has-warning">
+
+            <div class="page" tabindex="-1">
+                
+                <header></header>
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">Rust 程序设计语言 简体中文版</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="ch17-02-trait-objects.html#为使用不同类型的值而设计的-trait-对象" id="为使用不同类型的值而设计的-trait-对象"><h2>为使用不同类型的值而设计的 trait 对象</h2></a>
+<blockquote>
+<p><a href="https://github.com/rust-lang/book/blob/master/second-edition/src/ch17-02-trait-objects.md">ch17-02-trait-objects.md</a>
+<br>
+commit 67876e3ef5323ce9d394f3ea6b08cb3d173d9ba9</p>
+</blockquote>
+<p>在第八章中，我们谈到了 vector 只能存储同种类型元素的局限。在列表 8-1 中有一个例子，其中定义了一个拥有分别存放整型、浮点型和文本型成员的枚举类型 <code>SpreadsheetCell</code>，使用这个枚举的 vector 可以在每一个单元格（cell）中储存不同类型的数据，并使得 vector 整体仍然代表一行（row）单元格。这当编译代码时就知道希望可以交替使用的类型为固定集合的情况下是可行的。</p>
+<!-- The code example I want to reference did not have a listing number; it's
+the one with SpreadsheetCell. I will go back and add Listing 8-1 next time I
+get Chapter 8 for editing. /Carol -->
+<p>有时，我们希望使用的类型的集合对于使用库的程序员来说是可扩展的。例如，很多图形用户接口（GUI）工具有一个项目列表的概念，它通过遍历列表并调用每一个项目的 <code>draw</code> 方法来将其绘制到屏幕上。我们将要创建一个叫做 <code>rust_gui</code> 的库 crate，它含一个 GUI 库的结构。这个 GUI 库包含一些可供开发者使用的类型，比如 <code>Button</code> 或 <code>TextField</code>。使用 <code>rust_gui</code> 的程序员会想要创建更多可以绘制在屏幕上的类型：其中一些可能会增加一个 <code>Image</code>，而另一些可能会增加一个 <code>SelectBox</code>。本章节并不准备实现一个功能完善的 GUI 库，不过会展示其中各个部分是如何结合在一起的。</p>
+<p>编写 <code>rust_gui</code> 库时，我们并不知道其他程序员想要创建的全部类型，所以无法定义一个 <code>enum</code> 来包含所有这些类型。我们所要做的是使 <code>rust_gui</code> 能够记录一系列不同类型的值，并能够对其中每一个值调用 <code>draw</code> 方法。 GUI 库不需要知道当调用 <code>draw</code> 方法时具体会发生什么，只需提供这些值可供调用的方法即可。</p>
+<p>在拥有继承的语言中，我们可能定义一个名为 <code>Component</code> 的类，该类上有一个 <code>draw</code> 方法。其他的类比如 <code>Button</code>、<code>Image</code> 和 <code>SelectBox</code> 会从 <code>Component</code> 派生并因此继承 <code>draw</code> 方法。它们各自都可以覆盖 <code>draw</code> 方法来定义自己的行为，但是框架会把所有这些类型当作是 <code>Component</code> 的实例，并在其上调用 <code>draw</code>。</p>
+<a class="header" href="ch17-02-trait-objects.html#定义通用行为的-trait" id="定义通用行为的-trait"><h3>定义通用行为的 trait</h3></a>
+<p>不过，在 Rust 中，我们可以定义一个 <code>Draw</code> trait，包含名为 <code>draw</code> 的方法。接着可以定义一个存放<strong>trait 对象</strong>（<em>trait
+object</em>）的 vector，trait 对象是一个位于某些指针，比如 <code>&amp;</code> 引用或 <code>Box&lt;T&gt;</code> 智能指针，之后的 trait。第十九章会讲到为何 trait 对象必须位于指针之后的原因。</p>
+<p>之前提到过，我们并不将结构体与枚举称之为“对象”，以便与其他语言中的对象相区别。结构体与枚举和 <code>impl</code> 块中的行为是分开的，不同于其他语言中将数据和行为组合进一个称为对象的概念中。trait 对象将由指向具体对象的指针构成的数据和定义于 trait 中方法的行为结合在一起，从这种意义上说它<strong>则</strong>更类似其他语言中的对象。不过 trait 对象与其他语言中的对象是不同的，因为不能向 trait 对象增加数据。trait 对象并不像其他语言中的对象那么通用：他们（trait 对象）的作用是允许对通用行为的抽象。</p>
+<p>trait 对象定义了在给定情况下所需的行为。接着就可以在要使用具体类型或泛型的地方使用 trait 来作为 trait 对象。Rust 的类型系统会确保任何我们替换为 trait 对象的值都会实现了 trait 的方法。这样就无需在编译时就知道所有可能的类型，就能够用同样的方法处理所有的实例。列表 17-3 展示了如何定义一个带有 <code>draw</code> 方法的 trait <code>Draw</code>：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub trait Draw {
+    fn draw(&amp;self);
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 17-3:<code>Draw</code> trait 的定义</span></p>
+<!-- NEXT PARAGRAPH WRAPPED WEIRD INTENTIONALLY SEE #199 -->
+<p>因为第十章已经讨论过如何定义 trait，这看起来应该比较眼熟。接下来就是新内容了：列表 17-4 有一个名为 <code>Screen</code> 的结构体定义，它存放了一个叫做 <code>components</code> 的 <code>Box&lt;Draw&gt;</code> 类型的 vector 。<code>Box&lt;Draw&gt;</code> 是一个 trait 对象：它是 <code>Box</code> 中任何实现了 <code>Draw</code> trait 的类型的替身。</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+# pub trait Draw {
+#     fn draw(&amp;self);
+# }
+#
+pub struct Screen {
+    pub components: Vec&lt;Box&lt;Draw&gt;&gt;,
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 17-4: 一个 <code>Screen</code> 结构体的定义，它带有一个字段<code>components</code>，其包含实现了 <code>Draw</code> trait 的 trait 对象的 vector</span></p>
+<p>在 <code>Screen</code> 结构体上，我们将定义一个 <code>run</code> 方法，该方法会对其 <code>components</code> 上的每一个元素调用 <code>draw</code> 方法，如列表 17-5 所示：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+# pub trait Draw {
+#     fn draw(&amp;self);
+# }
+#
+# pub struct Screen {
+#     pub components: Vec&lt;Box&lt;Draw&gt;&gt;,
+# }
+#
+impl Screen {
+    pub fn run(&amp;self) {
+        for component in self.components.iter() {
+            component.draw();
+        }
+    }
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 17-5:在 <code>Screen</code> 上实现一个 <code>run</code> 方法，该方法在每个 component 上调用 <code>draw</code> 方法</span></p>
+<p>这与定义使用了带有 trait bound 的泛型类型参数的结构体不同。泛型类型参数一次只能替代一个具体的类型，而 trait 对象则允许在运行时替代多种具体类型。例如，可以像列表 17-6 那样定义使用泛型和 trait bound 的结构体 <code>Screen</code>：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+# pub trait Draw {
+#     fn draw(&amp;self);
+# }
+#
+pub struct Screen&lt;T: Draw&gt; {
+    pub components: Vec&lt;T&gt;,
+}
+
+impl&lt;T&gt; Screen&lt;T&gt;
+    where T: Draw {
+    pub fn run(&amp;self) {
+        for component in self.components.iter() {
+            component.draw();
+        }
+    }
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 17-6: 一种 <code>Screen</code> 结构体的替代实现，它的 <code>run</code> 方法使用泛型和 trait bound</span></p>
+<p>这只允许我们拥有一个包含全是 <code>Button</code> 类型或者全是 <code>TextField</code> 类型的 component 列表的 <code>Screen</code> 实例。如果只拥有相同类型的集合，那么使用泛型和 trait bound 是更好的，因为在编译时使用具体类型其定义是单态（monomorphized）的。</p>
+<p>相反对于存放了 <code>Vec&lt;Box&lt;Draw&gt;&gt;</code> trait 对象的 component 列表的 <code>Screen</code> 定义，一个 <code>Screen</code> 实例可以存放一个既可以包含 <code>Box&lt;Button&gt;</code>，也可以包含 <code>Box&lt;TextField&gt;</code> 的 <code>Vec</code>。让我们看看它是如何工作的，接着会讲到其运行时性能影响。</p>
+<a class="header" href="ch17-02-trait-objects.html#来自我们或者库使用者的-trait-实现" id="来自我们或者库使用者的-trait-实现"><h3>来自我们或者库使用者的 trait 实现</h3></a>
+<p>现在来增加一些实现了 <code>Draw</code> trait 的类型。我们将提供 <code>Button</code> 类型，再一次重申，真正实现 GUI 库超出了本书的范畴，所以 <code>draw</code> 方法体中不会有任何有意义的实现。为了想象一下这个实现看起来像什么，一个 <code>Button</code> 结构体可能会拥有 <code>width</code>、<code>height</code>和<code>label</code>字段，如列表 17-7 所示：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+# pub trait Draw {
+#     fn draw(&amp;self);
+# }
+#
+pub struct Button {
+    pub width: u32,
+    pub height: u32,
+    pub label: String,
+}
+
+impl Draw for Button {
+    fn draw(&amp;self) {
+        // Code to actually draw a button
+    }
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 17-7: 一个实现了<code>Draw</code> trait 的 <code>Button</code> 结构体</span></p>
+<p>在 <code>Button</code> 上的 <code>width</code>、<code>height</code> 和 <code>label</code> 字段会和其他组件不同，比如 <code>TextField</code> 可能有 <code>width</code>、<code>height</code>、<code>label</code> 以及 <code>placeholder</code> 字段。每一个我们希望能在屏幕上绘制的类型都会使用不同的代码来实现 <code>Draw</code> trait 的 <code>draw</code> 方法，来定义如何绘制像这里的 <code>Button</code> 类型（并不包含任何实际的 GUI 代码，这超出了本章的范畴）。除了实现 <code>Draw</code> trait 之外，<code>Button</code> 还可能有另一个包含按钮点击如何响应的方法的 <code>impl</code> 块。这类方法并不适用于像 <code>TextField</code> 这样的类型。</p>
+<p>一些库的使用者决定实现一个包含 <code>width</code>、<code>height</code>和<code>options</code> 字段的结构体 <code>SelectBox</code>。并也为其实现了 <code>Draw</code> trait，如列表 17-8 所示：</p>
+<p><span class="filename">文件名: src/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+extern crate rust_gui;
+use rust_gui::Draw;
+
+struct SelectBox {
+    width: u32,
+    height: u32,
+    options: Vec&lt;String&gt;,
+}
+
+impl Draw for SelectBox {
+    fn draw(&amp;self) {
+        // Code to actually draw a select box
+    }
+}
+#}</code></pre></pre>
+<p><span class="caption">列表 17-8: 在另一个使用 <code>rust_gui</code> 的 crate 中，在 <code>SelectBox</code> 结构体上实现 <code>Draw</code> trait</span></p>
+<p>库使用者现在可以在他们的 <code>main</code> 函数中创建一个 <code>Screen</code> 实例，并通过将 <code>SelectBox</code> 和 <code>Button</code> 放入 <code>Box&lt;T&gt;</code> 转变为 trait 对象来将它们放入屏幕实例。接着可以调用 <code>Screen</code> 的 <code>run</code> 方法，它会调用每个组件的 <code>draw</code> 方法。列表 17-9 展示了这个实现：</p>
+<p><span class="filename">文件名: src/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">use rust_gui::{Screen, Button};
+
+fn main() {
+    let screen = Screen {
+        components: vec![
+            Box::new(SelectBox {
+                width: 75,
+                height: 10,
+                options: vec![
+                    String::from(&quot;Yes&quot;),
+                    String::from(&quot;Maybe&quot;),
+                    String::from(&quot;No&quot;)
+                ],
+            }),
+            Box::new(Button {
+                width: 50,
+                height: 10,
+                label: String::from(&quot;OK&quot;),
+            }),
+        ],
+    };
+
+    screen.run();
+}
+</code></pre></pre>
+<p><span class="caption">列表 17-9: 使用 trait 对象来存储实现了相同 trait 的不同类型的值</span></p>
+<p>即使我们不知道何时何人会增加 <code>SelectBox</code> 类型，<code>Screen</code> 的实现能够操作<code>SelectBox</code> 并绘制它，因为 <code>SelectBox</code> 实现了 <code>Draw</code> trait，这意味着它实现了 <code>draw</code> 方法。</p>
+<p>只关心值所反映的信息而不是值的具体类型，这类似于动态类型语言中称为<strong>鸭子类型</strong>（<em>duck typing</em>）的概念：如果它走起来像一只鸭子，叫起来像一只鸭子，那么它就是一只鸭子！在列表 17-5 中 <code>Screen</code> 上的 <code>run</code> 实现中，<code>run</code> 并不需要知道各个组件的具体类型是什么。它并不检查组件实例是 <code>Button</code> 或者是<code>SelectBox</code>，它只是调用组件上的 <code>draw</code> 方法。通过指定 <code>Box&lt;Draw&gt;</code> 作为 <code>components</code> vector 中值的类型，我们就定义了 <code>Screen</code> 需要可以在其上调用 <code>draw</code> 方法的值。</p>
+<p>使用 trait 对象和 Rust 类型系统来使用鸭子类型的优势是无需在运行时检查一个值是否实现了特定方法或者担心在调用时因为值没有实现方法而产生错误。如果值没有实现 trait 对象所需的 trait 则 Rust 不会编译这些代码。</p>
+<p>例如，列表 17-10 展示了当创建一个使用 <code>String</code> 做为其组件的 <code>Screen</code> 时发生的情况：</p>
+<p><span class="filename">文件名: src/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">extern crate rust_gui;
+use rust_gui::Draw;
+
+fn main() {
+    let screen = Screen {
+        components: vec![
+            Box::new(String::from(&quot;Hi&quot;)),
+        ],
+    };
+
+    screen.run();
+}
+</code></pre></pre>
+<p><span class="caption">列表 17-10: 尝试使用一种没有实现 trait 对象的 trait 的类型</span></p>
+<p>我们会遇到这个错误，因为 <code>String</code> 没有实现 <code>Draw</code> trait：</p>
+<pre><code>error[E0277]: the trait bound `std::string::String: Draw` is not satisfied
+  --&gt;
+   |
+ 4 |             Box::new(String::from(&quot;Hi&quot;)),
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Draw` is not
+   implemented for `std::string::String`
+   |
+   = note: required for the cast to the object type `Draw`
+</code></pre>
+<p>这告诉了我们，要么是我们传递了并不希望传递给 <code>Screen</code> 的类型并应该提供其他类型，要么应该在 <code>String</code> 上实现 <code>Draw</code> 以便 <code>Screen</code> 可以调用其上的 <code>draw</code>。</p>
+<a class="header" href="ch17-02-trait-objects.html#trait-对象执行动态分发" id="trait-对象执行动态分发"><h3>trait 对象执行动态分发</h3></a>
+<p>回忆一下第十章讨论过的，当对泛型使用 trait bound 时编译器所进行单态化处理：编译器为每一个被泛型类型参数代替的具体类型生成了非泛型的函数和方法实现。单态化所产生的代码进行<strong>静态分发</strong>（<em>static dispatch</em>）：当方法被调用时，伴随方法调用的代码在编译时就被确定了，同时寻找这些代码是非常快速的。</p>
+<p>当使用 trait 对象时，编译器并不进行单态化，因为并不知道所有可能会使用这些代码的类型。相反，Rust 记录当方法被调用时可能会用到的代码，并在运行时计算出特定方法调用时所需的代码。这被称为<strong>动态分发</strong>（<em>dynamic dispatch</em>），进行这种代码搜寻是有运行时开销的。动态分发也阻止编译有选择的内联方法的代码，这会禁用一些优化。尽管在编写和支持代码的过程中确实获得了额外的灵活性，但仍然需要权衡取舍。</p>
+<a class="header" href="ch17-02-trait-objects.html#trait-对象要求对象安全" id="trait-对象要求对象安全"><h3>Trait 对象要求对象安全</h3></a>
+<!-- Liz: we're conflicted on including this section. Not being able to use a
+trait as a trait object because of object safety is something that
+beginner/intermediate Rust developers run into sometimes, but explaining it
+fully is long and complicated. Should we just cut this whole section? Leave it
+(and finish the explanation of how to fix the error at the end)? Shorten it to
+a quick caveat, that just says something like "Some traits can't be trait
+objects. Clone is an example of one. You'll get errors that will let you know
+if a trait can't be a trait object, look up object safety if you're interested
+in the details"? Thanks! /Carol -->
+<p>不是所有的 trait 都可以被放进 trait 对象中；只有<strong>对象安全</strong>（<em>object safe</em>）的 trait 才可以。 一个 trait 只有同时满足如下两点时才被认为是对象安全的:</p>
+<ul>
+<li>trait 不要求 <code>Self</code> 是 <code>Sized</code> 的</li>
+<li>所有的 trait 方法都是对象安全的</li>
+</ul>
+<p><code>Self</code> 关键字是我们要实现 trait 或方法的类型的别名。<code>Sized</code> 是一个类似第十六章中介绍的 <code>Send</code> 和 <code>Sync</code> 那样的标记 trait。<code>Sized</code> 会自动为在编译时有已知大小的类型实现，比如 <code>i32</code> 和引用。包括 slice （<code>[T]</code>）和 trait 对象这样的没有已知大小的类型则没有。</p>
+<p><code>Sized</code> 是一个所有泛型参数类型默认的隐含 trait bound。Rust 中大部分实用的操作都要求类型是 <code>Sized</code> 的，所以将 <code>Sized</code> 作为默认 trait bound 要求，就可以不必在每一次使用泛型时编写 <code>T: Sized</code> 了。然而，如果想要使用在 slice 上使用 trait，则需要去掉 <code>Sized</code> trait bound，可以通过指定 <code>T: ?Sized</code> 作为 trait bound 来做到这一点。</p>
+<p>trait 有一个默认的 bound <code>Self: ?Sized</code>，这意味着他们可以在是或者不是 <code>Sized</code> 的类型上实现。如果创建了一个去掉了 <code>Self: ?Sized</code> bound 的 trait <code>Foo</code>，它可能看起来像这样：</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+trait Foo: Sized {
+    fn some_method(&amp;self);
+}
+#}</code></pre></pre>
+<p>trait <code>Sized</code> 现在就是 trait <code>Foo</code> 的<strong>父 trait</strong>（<em>supertrait</em>）了，也就意味着 trait <code>Foo</code> 要求实现 <code>Foo</code> 的类型（也就是 <code>Self</code>）是 <code>Sized</code> 的。我们将在第十九章中更详细的介绍父 trait。</p>
+<p>像 <code>Foo</code> 这样要求 <code>Self</code> 是 <code>Sized</code> 的 trait 不被允许成为 trait 对象的原因是，不可能为 trait 对象实现 <code>Foo</code> trait：trait 对象不是 <code>Sized</code> 的，但是 <code>Foo</code> 又要求 <code>Self</code> 是 <code>Sized</code> 的。一个类型不可能同时既是有确定大小的又是无确定大小的。</p>
+<p>关于第二条对象安全要求说到 trait 的所有方法都必须是对象安全的，一个对象安全的方法满足下列条件之一：</p>
+<ul>
+<li>要求 <code>Self</code> 是 <code>Sized</code> 的，或者</li>
+<li>满足如下三点：
+<ul>
+<li>必须不包含任何泛型类型参数</li>
+<li>其第一个参数必须是 <code>Self</code> 类型或者能解引用为 <code>Self</code> 的类型（也就是说它必须是一个方法而非关联函数，并且以 <code>self</code>、<code>&amp;self</code> 或 <code>&amp;mut self</code> 作为第一个参数）</li>
+<li>必须不能在方法签名中除第一个参数之外的地方使用 <code>Self</code></li>
+</ul>
+</li>
+</ul>
+<p>虽然这些规则有一点形式化, 但是换个角度想一下：如果方法在它的签名的其他什么地方要求使用具体的 <code>Self</code> 类型，而一个对象又忘记了它具体的类型，这时方法就无法使用它遗忘的原始的具体类型了。当使用 trait 的泛型类型参数被放入具体类型参数时也是如此：这个具体的类型就成了实现该 trait 的类型的一部分。一旦这个类型因使用 trait 对象而被擦除掉了之后，就无法知道放入泛型类型参数的类型是什么了。</p>
+<p>一个 trait 的方法不是对象安全的例子是标准库中的 <code>Clone</code> trait。<code>Clone</code> trait 的 <code>clone</code> 方法的参数签名看起来像这样：</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub trait Clone {
+    fn clone(&amp;self) -&gt; Self;
+}
+#}</code></pre></pre>
+<p><code>String</code> 实现了 <code>Clone</code> trait，当在 <code>String</code> 实例上调用 <code>clone</code> 方法时会得到一个 <code>String</code> 实例。类似的，当调用 <code>Vec</code> 实例的 <code>clone</code> 方法会得到一个 <code>Vec</code> 实例。<code>clone</code> 的签名需要知道什么类型会代替 <code>Self</code>，因为这是它的返回值。</p>
+<p>如果尝试在像列表 17-3 中 <code>Draw</code> 那样的 trait 上实现 <code>Clone</code>，就无法知道 <code>Self</code> 将会是 <code>Button</code>、<code>SelectBox</code> 亦或是将来会实现 <code>Draw</code> trait 的其他什么类型。</p>
+<p>如果尝试做一些违反有关 trait 对象但违反对象安全规则的事情，编译器会提示你。例如，如果尝试实现列表 17-4 中的 <code>Screen</code> 结构体来存放实现了 <code>Clone</code> trait 而不是 <code>Draw</code> trait 的类型，像这样：</p>
+<pre><code class="language-rust ignore">pub struct Screen {
+    pub components: Vec&lt;Box&lt;Clone&gt;&gt;,
+}
+</code></pre>
+<p>将会得到如下错误：</p>
+<pre><code>error[E0038]: the trait `std::clone::Clone` cannot be made into an object
+ --&gt;
+  |
+2 |     pub components: Vec&lt;Box&lt;Clone&gt;&gt;,
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::clone::Clone` cannot be
+  made into an object
+  |
+  = note: the trait cannot require that `Self : Sized`
+</code></pre>
+<!-- If we are including this section, we would explain how to fix this
+problem. It involves adding another trait and implementing Clone manually for
+that trait. Because this section is getting long, I stopped because it feels
+like we're off in the weeds with an esoteric detail that not everyone will need
+to know about. /Carol -->
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="ch17-01-what-is-oo.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="ch17-03-oo-design-patterns.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="ch17-01-what-is-oo.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="ch17-03-oo-design-patterns.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

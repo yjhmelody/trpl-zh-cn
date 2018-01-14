@@ -1,0 +1,386 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>设计线程池接口 - 设计线程池接口 - Rust 程序设计语言 简体中文版</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="Rust 程序设计语言 简体中文版">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        <style>
+            .page-wrapper.has-warning > .nav-chapters {
+              /* add height for warning content & margin */
+              top: 120px;
+            }
+
+            p.warning {
+                background-color: rgb(242, 222, 222);
+                border-bottom-color: rgb(238, 211, 215);
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
+                border-bottom-style: solid;
+                border-bottom-width: 0.666667px;
+                border-image-outset: 0 0 0 0;
+                border-image-repeat: stretch stretch;
+                border-image-slice: 100% 100% 100% 100%;
+                border-image-source: none;
+                border-image-width: 1 1 1 1;
+                border-left-color: rgb(238, 211, 215);
+                border-left-style: solid;
+                border-left-width: 0.666667px;
+                border-right-color: rgb(238, 211, 215);
+                border-right-style: solid;
+                border-right-width: 0.666667px;
+                border-top-color: rgb(238, 211, 215);
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border-top-style: solid;
+                border-top-width: 0.666667px;
+                color: rgb(185, 74, 72);
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                margin-top: 30px;
+                padding-bottom: 8px;
+                padding-left: 14px;
+                padding-right: 35px;
+                padding-top: 8px;
+            }
+            p.warning strong {
+                color: rgb(185, 74, 72)
+            }
+            p.warning a {
+                color: rgb(0, 136, 204)
+            }
+
+            a .hljs {
+                color: #4183c4;
+            }
+
+            .rust .content a .hljs,
+            .coal .content a .hljs,
+            .navy .content a .hljs {
+                color: #2b79a2;
+            }
+
+            a:hover .hljs {
+                text-decoration: underline;
+            }
+
+            /* Styles keystrokes such as ctrl-C */
+            .keystroke {
+                font-variant: small-caps;
+            }
+        </style>
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('mdbook-theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('mdbook-sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="ch01-00-introduction.html"><strong>1.</strong> 介绍</a></li><li><ul class="section"><li><a href="ch01-01-installation.html"><strong>1.1.</strong> 安装</a></li><li><a href="ch01-02-hello-world.html"><strong>1.2.</strong> Hello, World!</a></li></ul></li><li><a href="ch02-00-guessing-game-tutorial.html"><strong>2.</strong> 猜猜看教程</a></li><li><a href="ch03-00-common-programming-concepts.html"><strong>3.</strong> 通用编程概念</a></li><li><ul class="section"><li><a href="ch03-01-variables-and-mutability.html"><strong>3.1.</strong> 变量与可变性</a></li><li><a href="ch03-02-data-types.html"><strong>3.2.</strong> 数据类型</a></li><li><a href="ch03-03-how-functions-work.html"><strong>3.3.</strong> 函数如何工作</a></li><li><a href="ch03-04-comments.html"><strong>3.4.</strong> 注释</a></li><li><a href="ch03-05-control-flow.html"><strong>3.5.</strong> 控制流</a></li></ul></li><li><a href="ch04-00-understanding-ownership.html"><strong>4.</strong> 认识所有权</a></li><li><ul class="section"><li><a href="ch04-01-what-is-ownership.html"><strong>4.1.</strong> 什么是所有权</a></li><li><a href="ch04-02-references-and-borrowing.html"><strong>4.2.</strong> 引用与借用</a></li><li><a href="ch04-03-slices.html"><strong>4.3.</strong> Slices</a></li></ul></li><li><a href="ch05-00-structs.html"><strong>5.</strong> 使用结构体来组织相关联的数据</a></li><li><ul class="section"><li><a href="ch05-01-defining-structs.html"><strong>5.1.</strong> 定义并实例化结构体</a></li><li><a href="ch05-02-example-structs.html"><strong>5.2.</strong> 一个使用结构体的示例程序</a></li><li><a href="ch05-03-method-syntax.html"><strong>5.3.</strong> 方法语法</a></li></ul></li><li><a href="ch06-00-enums.html"><strong>6.</strong> 枚举与模式匹配</a></li><li><ul class="section"><li><a href="ch06-01-defining-an-enum.html"><strong>6.1.</strong> 定义枚举</a></li><li><a href="ch06-02-match.html"><strong>6.2.</strong> <code>match</code> 控制流运算符</a></li><li><a href="ch06-03-if-let.html"><strong>6.3.</strong> <code>if let</code> 简洁控制流</a></li></ul></li><li><a href="ch07-00-modules.html"><strong>7.</strong> 模块</a></li><li><ul class="section"><li><a href="ch07-01-mod-and-the-filesystem.html"><strong>7.1.</strong> <code>mod</code> 与文件系统</a></li><li><a href="ch07-02-controlling-visibility-with-pub.html"><strong>7.2.</strong> 使用 <code>pub</code> 控制可见性</a></li><li><a href="ch07-03-importing-names-with-use.html"><strong>7.3.</strong> 在不同的模块中引用命名</a></li></ul></li><li><a href="ch08-00-common-collections.html"><strong>8.</strong> 通用集合类型</a></li><li><ul class="section"><li><a href="ch08-01-vectors.html"><strong>8.1.</strong> vector</a></li><li><a href="ch08-02-strings.html"><strong>8.2.</strong> 字符串</a></li><li><a href="ch08-03-hash-maps.html"><strong>8.3.</strong> 哈希 map</a></li></ul></li><li><a href="ch09-00-error-handling.html"><strong>9.</strong> 错误处理</a></li><li><ul class="section"><li><a href="ch09-01-unrecoverable-errors-with-panic.html"><strong>9.1.</strong> <code>panic!</code> 与不可恢复的错误</a></li><li><a href="ch09-02-recoverable-errors-with-result.html"><strong>9.2.</strong> <code>Result</code> 与可恢复的错误</a></li><li><a href="ch09-03-to-panic-or-not-to-panic.html"><strong>9.3.</strong> <code>panic!</code> 还是不 <code>panic!</code></a></li></ul></li><li><a href="ch10-00-generics.html"><strong>10.</strong> 泛型、trait 与生命周期</a></li><li><ul class="section"><li><a href="ch10-01-syntax.html"><strong>10.1.</strong> 泛型数据类型</a></li><li><a href="ch10-02-traits.html"><strong>10.2.</strong> trait：定义共享的行为</a></li><li><a href="ch10-03-lifetime-syntax.html"><strong>10.3.</strong> 生命周期与引用有效性</a></li></ul></li><li><a href="ch11-00-testing.html"><strong>11.</strong> 测试</a></li><li><ul class="section"><li><a href="ch11-01-writing-tests.html"><strong>11.1.</strong> 编写测试</a></li><li><a href="ch11-02-running-tests.html"><strong>11.2.</strong> 运行测试</a></li><li><a href="ch11-03-test-organization.html"><strong>11.3.</strong> 测试的组织结构</a></li></ul></li><li><a href="ch12-00-an-io-project.html"><strong>12.</strong> 一个 I/O 项目：构建命令行程序</a></li><li><ul class="section"><li><a href="ch12-01-accepting-command-line-arguments.html"><strong>12.1.</strong> 接受命令行参数</a></li><li><a href="ch12-02-reading-a-file.html"><strong>12.2.</strong> 读取文件</a></li><li><a href="ch12-03-improving-error-handling-and-modularity.html"><strong>12.3.</strong> 重构以改进模块化与错误处理</a></li><li><a href="ch12-04-testing-the-librarys-functionality.html"><strong>12.4.</strong> 采用测试驱动开发完善库的功能</a></li><li><a href="ch12-05-working-with-environment-variables.html"><strong>12.5.</strong> 处理环境变量</a></li><li><a href="ch12-06-writing-to-stderr-instead-of-stdout.html"><strong>12.6.</strong> 将错误信息输出到标准错误而不是标准输出</a></li></ul></li><li><a href="ch13-00-functional-features.html"><strong>13.</strong> Rust 中的函数式语言功能：迭代器与闭包</a></li><li><ul class="section"><li><a href="ch13-01-closures.html"><strong>13.1.</strong> 闭包：可以捕获其环境的匿名函数</a></li><li><a href="ch13-02-iterators.html"><strong>13.2.</strong> 使用迭代器处理元素序列</a></li><li><a href="ch13-03-improving-our-io-project.html"><strong>13.3.</strong> 改进之前的 I/O 项目</a></li><li><a href="ch13-04-performance.html"><strong>13.4.</strong> 性能比较：循环对迭代器</a></li></ul></li><li><a href="ch14-00-more-about-cargo.html"><strong>14.</strong> 更多关于 Cargo 和 Crates.io 的内容</a></li><li><ul class="section"><li><a href="ch14-01-release-profiles.html"><strong>14.1.</strong> 采用发布配置自定义构建</a></li><li><a href="ch14-02-publishing-to-crates-io.html"><strong>14.2.</strong> 将 crate 发布到 Crates.io</a></li><li><a href="ch14-03-cargo-workspaces.html"><strong>14.3.</strong> Cargo 工作空间</a></li><li><a href="ch14-04-installing-binaries.html"><strong>14.4.</strong> 使用 <code>cargo install</code> 从 Crates.io 安装二进制文件</a></li><li><a href="ch14-05-extending-cargo.html"><strong>14.5.</strong> Cargo 自定义扩展命令</a></li></ul></li><li><a href="ch15-00-smart-pointers.html"><strong>15.</strong> 智能指针</a></li><li><ul class="section"><li><a href="ch15-01-box.html"><strong>15.1.</strong> <code>Box&lt;T&gt;</code> 在堆上存储数据，并且可确定大小</a></li><li><a href="ch15-02-deref.html"><strong>15.2.</strong> <code>Deref</code> Trait 允许通过引用访问数据</a></li><li><a href="ch15-03-drop.html"><strong>15.3.</strong> <code>Drop</code> Trait 运行清理代码</a></li><li><a href="ch15-04-rc.html"><strong>15.4.</strong> <code>Rc&lt;T&gt;</code> 引用计数智能指针</a></li><li><a href="ch15-05-interior-mutability.html"><strong>15.5.</strong> <code>RefCell&lt;T&gt;</code> 和内部可变性模式</a></li><li><a href="ch15-06-reference-cycles.html"><strong>15.6.</strong> 引用循环和内存泄漏是安全的</a></li></ul></li><li><a href="ch16-00-concurrency.html"><strong>16.</strong> 无畏并发</a></li><li><ul class="section"><li><a href="ch16-01-threads.html"><strong>16.1.</strong> 线程</a></li><li><a href="ch16-02-message-passing.html"><strong>16.2.</strong> 消息传递</a></li><li><a href="ch16-03-shared-state.html"><strong>16.3.</strong> 共享状态</a></li><li><a href="ch16-04-extensible-concurrency-sync-and-send.html"><strong>16.4.</strong> 可扩展的并发：<code>Sync</code>和<code>Send</code></a></li></ul></li><li><a href="ch17-00-oop.html"><strong>17.</strong> Rust 是面向对象语言吗？</a></li><li><ul class="section"><li><a href="ch17-01-what-is-oo.html"><strong>17.1.</strong> 什么是面向对象？</a></li><li><a href="ch17-02-trait-objects.html"><strong>17.2.</strong> 为使用不同类型的值而设计的 trait 对象</a></li><li><a href="ch17-03-oo-design-patterns.html"><strong>17.3.</strong> 面向对象设计模式的实现</a></li></ul></li><li><a href="ch18-00-patterns.html"><strong>18.</strong> 模式用来匹配值的结构</a></li><li><ul class="section"><li><a href="ch18-01-all-the-places-for-patterns.html"><strong>18.1.</strong> 所有可能会用到模式的位置</a></li><li><a href="ch18-02-refutability.html"><strong>18.2.</strong> Refutability：何时模式可能会匹配失败</a></li><li><a href="ch18-03-pattern-syntax.html"><strong>18.3.</strong> 模式的全部语法</a></li></ul></li><li><a href="ch19-00-advanced-features.html"><strong>19.</strong> 高级特征</a></li><li><ul class="section"><li><a href="ch19-01-unsafe-rust.html"><strong>19.1.</strong> 不安全的 Rust</a></li><li><a href="ch19-02-advanced-lifetimes.html"><strong>19.2.</strong> 高级生命周期</a></li><li><a href="ch19-03-advanced-traits.html"><strong>19.3.</strong> 高级 trait</a></li><li><a href="ch19-04-advanced-types.html"><strong>19.4.</strong> 高级类型</a></li><li><a href="ch19-05-advanced-functions-and-closures.html"><strong>19.5.</strong> 高级函数与闭包</a></li></ul></li><li><a href="ch20-00-final-project-a-web-server.html"><strong>20.</strong> 最后的项目: 构建多线程 web server</a></li><li><ul class="section"><li><a href="ch20-01-single-threaded.html"><strong>20.1.</strong> 单线程 web server</a></li><li><a href="ch20-02-slow-requests.html"><strong>20.2.</strong> 慢请求如何影响吞吐率</a></li><li><a href="ch20-03-designing-the-interface.html" class="active"><strong>20.3.</strong> 设计线程池接口</a></li><li><a href="ch20-04-storing-threads.html"><strong>20.4.</strong> 创建线程池并储存线程</a></li><li><a href="ch20-05-sending-requests-via-channels.html"><strong>20.5.</strong> 使用通道向线程发送请求</a></li><li><a href="ch20-06-graceful-shutdown-and-cleanup.html"><strong>20.6.</strong> Graceful Shutdown 与清理</a></li></ul></li><li><a href="appendix-00.html"><strong>21.</strong> 附录</a></li><li><ul class="section"><li><a href="appendix-01-keywords.html"><strong>21.1.</strong> A - 关键字</a></li><li><a href="appendix-02-operators.html"><strong>21.2.</strong> B - 运算符与符号</a></li><li><a href="appendix-03-derivable-traits.html"><strong>21.3.</strong> C - 可导出的 trait</a></li><li><a href="appendix-04-macros.html"><strong>21.4.</strong> D - 宏</a></li><li><a href="appendix-05-translation.html"><strong>21.5.</strong> E - 本书翻译</a></li><li><a href="appendix-06-newest-features.html"><strong>21.6.</strong> F - 最新功能</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper has-warning">
+
+            <div class="page" tabindex="-1">
+                
+                <header></header>
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title">Rust 程序设计语言 简体中文版</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html">
+                            <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="ch20-03-designing-the-interface.html#设计线程池接口" id="设计线程池接口"><h2>设计线程池接口</h2></a>
+<blockquote>
+<p><a href="https://github.com/rust-lang/book/blob/master/second-edition/src/ch20-03-designing-the-interface.md">ch20-03-designing-the-interface.md</a>
+<br>
+commit d06a6a181fd61704cbf7feb55bc61d518c6469f9</p>
+</blockquote>
+<p>让我们讨论一下线程池看起来怎样。库作者们经常会发现，当尝试设计一些代码时，首先编写客户端接口确实有助于指导代码设计。以期望的调用方式来构建 API 代码的结构，接着在这个结构之内实现功能，而不是先实现功能再设计公有 API。</p>
+<p>类似于第十二章项目中使用的测试驱动开发。这里将要使用编译器驱动开发（Compiler Driven Development）。我们将编写调用所期望的函数的代码，接着依靠编译器告诉我们接下来需要修改什么。编译器错误信息会指导我们的实现。</p>
+<a class="header" href="ch20-03-designing-the-interface.html#如果使用-threadspawn-的代码结构" id="如果使用-threadspawn-的代码结构"><h3>如果使用 <code>thread::spawn</code> 的代码结构</h3></a>
+<p>首先，让我们探索一下为每一个连接都创建一个线程看起来如何。这并不是最终方案，因为正如之前讲到的它会潜在的分配无限的线程，不过这是一个开始。列表 20-11 展示了 <code>main</code> 的改变，它在 <code>for</code> 循环中为每一个流分配了一个新线程进行处理：</p>
+<p><span class="filename">Filename: src/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust no_run"># use std::thread;
+# use std::io::prelude::*;
+# use std::net::TcpListener;
+# use std::net::TcpStream;
+#
+fn main() {
+    let listener = TcpListener::bind(&quot;127.0.0.1:8080&quot;).unwrap();
+
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
+
+        thread::spawn(|| {
+            handle_connection(stream);
+        });
+    }
+}
+# fn handle_connection(mut stream: TcpStream) {}
+</code></pre></pre>
+<p><span class="caption">列表 20-11：为每一个流新建一个线程</span></p>
+<p>正如第十六章讲到的，<code>thread::spawn</code> 会创建一个新线程并运行闭包中的代码。如果运行这段代码并在两个浏览器标签页中加载 <code>/sleep</code> 和 <code>/</code>，确实会发现 <code>/</code> 请求并没有等待 <code>/sleep</code> 结束。不过正如之前提到的，这最终会使系统崩溃因为我们无限制的创建新线程。</p>
+<a class="header" href="ch20-03-designing-the-interface.html#为-threadpool-创建一个类似的接口" id="为-threadpool-创建一个类似的接口"><h3>为 <code>ThreadPool</code> 创建一个类似的接口</h3></a>
+<p>我们期望线程池以类似且熟悉的方式工作，以便从线程切换到线程池并不会对运行于线程池中的代码做出较大的修改。列表 20-12 展示我们希望用来替换 <code>thread::spawn</code> 的 <code>ThreadPool</code> 结构体的假想接口：</p>
+<p><span class="filename">文件名: src/main.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust no_run"># use std::thread;
+# use std::io::prelude::*;
+# use std::net::TcpListener;
+# use std::net::TcpStream;
+# struct ThreadPool;
+# impl ThreadPool {
+#    fn new(size: u32) -&gt; ThreadPool { ThreadPool }
+#    fn execute&lt;F&gt;(&amp;self, f: F)
+#        where F: FnOnce() + Send + 'static {}
+# }
+#
+fn main() {
+    let listener = TcpListener::bind(&quot;127.0.0.1:8080&quot;).unwrap();
+    let pool = ThreadPool::new(4);
+
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
+
+        pool.execute(|| {
+            handle_connection(stream);
+        });
+    }
+}
+# fn handle_connection(mut stream: TcpStream) {}
+</code></pre></pre>
+<p><span class="caption">列表 20-12：如何使用我们将要实现的 <code>ThreadPool</code></span></p>
+<p>这里使用 <code>ThreadPool::new</code> 来创建一个新的线程池，它有一个可配置的线程数的参数，在这里是四。这样在 <code>for</code> 循环中，<code>pool.execute</code> 将会以类似 <code>thread::spawn</code> 的方式工作。</p>
+<a class="header" href="ch20-03-designing-the-interface.html#采用编译器驱动开发来驱动-api-的编译" id="采用编译器驱动开发来驱动-api-的编译"><h3>采用编译器驱动开发来驱动 API 的编译</h3></a>
+<p>继续并对列表 20-12 中的 <em>src/main.rs</em> 做出修改，并利用编译器错误来驱动开发。下面是我们得到的第一个错误：</p>
+<pre><code>$ cargo check
+   Compiling hello v0.1.0 (file:///projects/hello)
+error[E0433]: failed to resolve. Use of undeclared type or module `ThreadPool`
+  --&gt; src\main.rs:10:16
+   |
+10 |     let pool = ThreadPool::new(4);
+   |                ^^^^^^^^^^^^^^^ Use of undeclared type or module
+   `ThreadPool`
+
+error: aborting due to previous error
+</code></pre>
+<p>好的，我们需要一个 <code>ThreadPool</code>。将 <code>hello</code> crate 从二进制 crate 转换为库 crate 来存放 <code>ThreadPool</code> 实现，因为线程池实现与我们的 web server 的特定工作相独立。一旦写完了线程池库，就可以在任何工作中使用这个功能，而不仅仅是处理网络请求。</p>
+<p>创建 <em>src/lib.rs</em> 文件，它包含了目前可用的最简单的 <code>ThreadPool</code> 定义：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub struct ThreadPool;
+#}</code></pre></pre>
+<p>接着创建一个新目录，<em>src/bin</em>，并将二进制 crate 根文件从 <em>src/main.rs</em> 移动到 <em>src/bin/main.rs</em>。这使得库 crate 成为 <em>hello</em> 目录的主要 crate；不过仍然可以使用 <code>cargo run</code> 运行 <em>src/bin/main.rs</em> 二进制文件。移动了 <em>main.rs</em> 文件之后，修改文件开头加入如下代码来引入库 crate 并将 <code>ThreadPool</code> 引入作用域：</p>
+<p><span class="filename">文件名: src/bin/main.rs</span></p>
+<pre><code class="language-rust ignore">extern crate hello;
+use hello::ThreadPool;
+</code></pre>
+<p>再次尝试运行来得到下一个需要解决的错误：</p>
+<pre><code>$ cargo check
+   Compiling hello v0.1.0 (file:///projects/hello)
+error: no associated item named `new` found for type `hello::ThreadPool` in the
+current scope
+  --&gt; src\main.rs:13:16
+   |
+13 |     let pool = ThreadPool::new(4);
+   |                ^^^^^^^^^^^^^^^
+   |
+</code></pre>
+<p>好的，下一步是为 <code>ThreadPool</code> 创建一个叫做 <code>new</code> 的关联函数。我们还知道 <code>new</code> 需要有一个参数可以接受 <code>4</code>，而且 <code>new</code> 应该返回 <code>ThreadPool</code> 实例。让我们实现拥有此特征的最小化 <code>new</code> 函数：</p>
+<p><span class="filename">文件夹: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub struct ThreadPool;
+
+impl ThreadPool {
+    pub fn new(size: u32) -&gt; ThreadPool {
+        ThreadPool
+    }
+}
+#}</code></pre></pre>
+<p>这里的 <code>size</code> 参数是 <code>u32</code> 类型，因为我们知道为负的线程数没有意义。<code>u32</code> 是一个很好的默认值。一旦真正实现了 <code>new</code>，我们将考虑实现需要选择什么类型，目前我们仅仅处理编译器错误。</p>
+<p>再次编译检查这段代码：</p>
+<pre><code>$ cargo check
+   Compiling hello v0.1.0 (file:///projects/hello)
+warning: unused variable: `size`, #[warn(unused_variables)] on by default
+ --&gt; src/lib.rs:4:16
+  |
+4 |     pub fn new(size: u32) -&gt; ThreadPool {
+  |                ^^^^
+
+error: no method named `execute` found for type `hello::ThreadPool` in the
+current scope
+  --&gt; src/main.rs:18:14
+   |
+18 |         pool.execute(|| {
+   |              ^^^^^^^
+</code></pre>
+<p>好的，一个警告和一个错误。暂时先忽略警告，错误是因为并没有 <code>ThreadPool</code> 上的 <code>execute</code> 方法。让我们来定义一个，它应该能接受一个闭包。如果你还记得第十三章，闭包作为参数时可以使用三个不同的 trait：<code>Fn</code>、<code>FnMut</code> 和 <code>FnOnce</code>。那么应该用哪一种闭包呢？好吧，最终需要实现的类似于 <code>thread::spawn</code>；<code>thread::spawn</code> 的签名在其参数中使用了何种 bound 呢？查看文档会发现：</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub fn spawn&lt;F, T&gt;(f: F) -&gt; JoinHandle&lt;T&gt;
+    where
+        F: FnOnce() -&gt; T + Send + 'static,
+        T: Send + 'static
+#}</code></pre></pre>
+<p><code>F</code> 是这里我们关心的参数；<code>T</code> 与返回值有关所以我们并不关心。考虑到 <code>spawn</code> 使用 <code>FnOnce</code> 作为 <code>F</code> 的 trait bound，这可能也是我们需要的，因为最终会将传递给 <code>execute</code> 的参数传给 <code>spawn</code>。因为处理请求的线程只会执行闭包一次，这也进一步确认了 <code>FnOnce</code> 是我们需要的 trait。</p>
+<p><code>F</code> 还有 trait bound <code>Send</code> 和生命周期绑定 <code>'static</code>，这对我们的情况也是有意义的：需要 <code>Send</code> 来将闭包从一个线程转移到另一个线程，而 <code>'static</code> 是因为并不知道线程会执行多久。让我们编写一个使用这些 bound 的泛型参数 <code>F</code> 的 <code>ThreadPool</code> 的 <code>execute</code> 方法：</p>
+<p><span class="filename">文件名: src/lib.rs</span></p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+# pub struct ThreadPool;
+impl ThreadPool {
+    // ...snip...
+
+    pub fn execute&lt;F&gt;(&amp;self, f: F)
+        where
+            F: FnOnce() + Send + 'static
+    {
+
+    }
+}
+#}</code></pre></pre>
+<p><code>FnOnce</code> trait 仍然需要之后的 <code>()</code>，因为这里的 <code>FnOnce</code> 代表一个没有参数也没有返回值的闭包。正如函数的定义，返回值类型可以从签名中省略，不过即便没有参数也需要括号。</p>
+<p>因为我们仍在努力使接口能够编译，这里增加了 <code>execute</code> 方法的最小化实现，它没有做任何工作。再次进行检查：</p>
+<pre><code>$ cargo check
+   Compiling hello v0.1.0 (file:///projects/hello)
+warning: unused variable: `size`, #[warn(unused_variables)] on by default
+ --&gt; src/lib.rs:4:16
+  |
+4 |     pub fn new(size: u32) -&gt; ThreadPool {
+  |                ^^^^
+
+warning: unused variable: `f`, #[warn(unused_variables)] on by default
+ --&gt; src/lib.rs:8:30
+  |
+8 |     pub fn execute&lt;F&gt;(&amp;self, f: F)
+  |                              ^
+</code></pre>
+<p>现在就只有警告了！能够编译了！注意如果尝试 <code>cargo run</code> 运行程序并在浏览器中发起请求，仍会在浏览器中出现在本章开始时那样的错误。这个库实际上还没有调用传递给 <code>execute</code> 的闭包！</p>
+<blockquote>
+<p>一个你可能听说过的关于像 Haskell 和 Rust 这样有严格编译器的语言的说法是“如果代码能够编译，它就能工作”。这是一个提醒大家的好时机，这只是一个说法和一种有时存在的感觉，实际上并不是完全正确的。我们的项目可以编译，不过它绝对没有做任何工作！如果构建一个真实且功能完整的项目，则需花费大量的时间来开始编写单元测试来检查代码能否编译<strong>并且</strong>拥有期望的行为。</p>
+</blockquote>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="ch20-02-slow-requests.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="ch20-04-storing-threads.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="ch20-02-slow-requests.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="ch20-04-storing-threads.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>
